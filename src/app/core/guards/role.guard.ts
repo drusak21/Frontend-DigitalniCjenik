@@ -6,13 +6,17 @@ export const roleGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   
   const dozvoljeneUloge = route.data['uloge'] as Array<string>;
-  const korisnikUloga = localStorage.getItem('korisnikUloga') || 'Gost';
+  const korisnikUloga = localStorage.getItem('korisnikUloga');
+  
+  if (!korisnikUloga) {
+    router.navigate(['/login']);
+    return false;
+  }
   
   if (dozvoljeneUloge.includes(korisnikUloga)) {
     return true;
   }
   
-
   router.navigate(['/']);
   return false;
 };

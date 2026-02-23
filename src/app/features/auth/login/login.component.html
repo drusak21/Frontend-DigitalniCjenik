@@ -13,7 +13,8 @@
           name="email"
           required
           #emailInput="ngModel"
-          placeholder="Unesite email">
+          placeholder="Unesite email"
+          [disabled]="loading">
         <div *ngIf="emailInput.invalid && emailInput.touched" class="error">
           Email je obavezan
         </div>
@@ -28,7 +29,8 @@
           name="lozinka"
           required
           #lozinkaInput="ngModel"
-          placeholder="Unesite lozinku">
+          placeholder="Unesite lozinku"
+          [disabled]="loading">
         <div *ngIf="lozinkaInput.invalid && lozinkaInput.touched" class="error">
           Lozinka je obavezna
         </div>
@@ -38,9 +40,14 @@
         {{ poruka }}
       </div>
 
-      <button type="submit" [disabled]="loginForm.invalid">
-        Prijavi se
+      <button type="submit" [disabled]="loginForm.invalid || loading">
+        <span *ngIf="loading">Prijava u tijeku...</span>
+        <span *ngIf="!loading">Prijavi se</span>
       </button>
     </form>
+    
+    <a routerLink="/cjenik/default" class="back-link">
+      ← Nastavi kao gost (pregled cjenika)
+    </a>
   </div>
 </div>

@@ -1,0 +1,217 @@
+<div class="korisnici-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>Upravljanje korisnicima</h2>
+      <p *ngIf="korisnici.length">Ukupno korisnika: {{ korisnici.length }}</p>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="🔍 Pretraži korisnike..."
+          class="search-input">
+      </div>
+      <button class="btn-primary" (click)="prikaziFormu = !prikaziFormu">
+        {{ prikaziFormu ? '✕ Zatvori' : '+ Dodaj korisnika' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Notifikacije -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✅ {{ successMessage }}
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Forma za dodavanje -->
+  <div class="card" *ngIf="prikaziFormu">
+    <h3>
+      <span class="card-icon">➕</span>
+      Dodaj novog korisnika
+    </h3>
+    
+    <form (ngSubmit)="dodajKorisnika()" #forma="ngForm" class="form-grid">
+      <div class="form-group">
+        <label for="ime">Ime i prezime *</label>
+        <input 
+          type="text" 
+          id="ime"
+          [(ngModel)]="noviKorisnik.imePrezime" 
+          name="ime" 
+          required
+          #ime="ngModel"
+          placeholder="Unesite ime i prezime">
+        <div *ngIf="ime.invalid && ime.touched" class="error-text">
+          Ime je obavezno
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input 
+          type="email" 
+          id="email"
+          [(ngModel)]="noviKorisnik.email" 
+          name="email" 
+          required
+          email
+          #emailField="ngModel"
+          placeholder="Unesite email">
+        <div *ngIf="emailField.invalid && emailField.touched" class="error-text">
+          Unesite ispravan email
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="uloga">Uloga *</label>
+        <select 
+          id="uloga"
+          [(ngModel)]="noviKorisnik.ulogaID" 
+          name="uloga" 
+          required>
+          <option *ngFor="let uloga of uloge" [value]="uloga.id">
+            {{ uloga.naziv }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="lozinka">Lozinka</label>
+        <input 
+          type="password" 
+          id="lozinka"
+          [(ngModel)]="noviKorisnik.lozinka" 
+          name="lozinka"
+          placeholder="Ostavite prazno za LDAP">
+        <small class="help-text">
+          Ako je LDAP korisnik, ostavite prazno
+        </small>
+      </div>
+
+      <div class="form-actions full-width">
+        <button type="submit" class="btn-primary" [disabled]="forma.invalid || loading">
+          <span *ngIf="loading">⏳ Dodavanje...</span>
+          <span *ngIf="!loading">✅ Dodaj korisnika</span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="prikaziFormu = false; resetFormu()">
+          ✕ Odustani
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && !korisnici.length" class="loading-state">
+    <div class="spinner"></div>
+    <p>Učitavanje korisnika...</p>
+  </div>
+
+  <!-- Tablica korisnika -->
+  <div class="card" *ngIf="!loading || korisnici.length">
+    <div class="table-responsive">
+      <table class="korisnici-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Ime i prezime</th>
+            <th>Email</th>
+            <th>Uloga</th>
+            <th>Jezik</th>
+            <th>Status</th>
+            <th>Akcije</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Edit red -->
+          <tr *ngIf="editKorisnik" class="edit-row">
+            <td>{{ editKorisnik.id }}</td>
+            <td>
+              <input type="text" [(ngModel)]="editData.imePrezime" class="edit-input">
+            </td>
+            <td>
+              <input type="email" [(ngModel)]="editData.email" class="edit-input">
+            </td>
+            <td>
+              <select [(ngModel)]="editData.ulogaID" class="edit-select">
+  <option *ngFor="let uloga of uloge" [value]="uloga.id">
+    {{ uloga.naziv }}
+  </option>
+</select>
+            </td>
+            <td>
+              <select [(ngModel)]="editData.jezikSucelja" class="edit-select">
+                <option value="HR">HR</option>
+                <option value="EN">EN</option>
+              </select>
+            </td>
+            <td>
+              <span class="status-badge" [class.status-active]="editKorisnik.aktivnost">
+                {{ editKorisnik.aktivnost ? 'Aktivan' : 'Neaktivan' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-save" (click)="spremiIzmjene()" [disabled]="loading">
+                💾 Spremi
+              </button>
+              <button class="btn-cancel" (click)="cancelEdit()">
+                ✕ Odustani
+              </button>
+            </td>
+          </tr>
+
+          <!-- Redovi korisnika -->
+          <tr *ngFor="let korisnik of filtriraniKorisnici">
+            <td><span class="id-badge">#{{ korisnik.id }}</span></td>
+            <td>{{ korisnik.imePrezime }}</td>
+            <td>{{ korisnik.email }}</td>
+            <td>
+  <span class="role-badge" [ngClass]="{
+    'role-admin': korisnik.ulogaNaziv === 'Administrator',
+    'role-putnik': korisnik.ulogaNaziv === 'Putnik',
+    'role-ugostitelj': korisnik.ulogaNaziv === 'Ugostitelj'
+  }">
+    {{ korisnik.ulogaNaziv }}
+  </span>
+</td>
+            <td>{{ korisnik.jezikSucelja }}</td>
+            <td>
+              <span class="status-badge" [class.status-active]="korisnik.aktivnost">
+                {{ korisnik.aktivnost ? 'Aktivan' : 'Neaktivan' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-icon btn-edit" (click)="urediKorisnika(korisnik)" 
+                      title="Uredi korisnika">
+                ✎
+              </button>
+              <button *ngIf="korisnik.aktivnost" 
+                      class="btn-icon btn-deactivate" 
+                      (click)="deaktivirajKorisnika(korisnik.id)"
+                      title="Deaktiviraj korisnika">
+                🔴
+              </button>
+              <button *ngIf="!korisnik.aktivnost" 
+                      class="btn-icon btn-activate" 
+                      (click)="aktivirajKorisnika(korisnik.id)"
+                      title="Aktiviraj korisnika">
+                🟢
+              </button>
+            </td>
+          </tr>
+
+          <!-- Nema rezultata -->
+          <tr *ngIf="filtriraniKorisnici.length === 0">
+            <td colspan="7" class="no-results">
+              Nema pronađenih korisnika
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

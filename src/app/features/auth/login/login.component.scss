@@ -106,3 +106,8 @@ button:disabled {
 .back-link:hover {
   color: #667eea;
 }
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

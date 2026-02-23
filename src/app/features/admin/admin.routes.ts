@@ -1,0 +1,27 @@
+import { Routes } from '@angular/router';
+import { authGuard } from '../../core/guards/auth.guard';
+import { roleGuard } from '../../core/guards/role.guard';
+
+export const ADMIN_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () => 
+      import('./admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { uloge: ['Administrator'] },
+    children: [
+      {
+        path: 'korisnici',
+        loadComponent: () => 
+          import('./korisnici/korisnici.component').then(m => m.KorisniciComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { uloge: ['Administrator'] }
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'korisnici'
+      }
+    ]
+  }
+];

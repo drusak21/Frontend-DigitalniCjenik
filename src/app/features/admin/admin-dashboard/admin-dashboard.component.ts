@@ -1,0 +1,22 @@
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+
+@Component({
+  selector: 'app-admin-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  templateUrl: './admin-dashboard.component.html',
+  styleUrl: './admin-dashboard.component.scss'
+})
+export class AdminDashboardComponent {
+   menuItems = [
+    { path: '/admin/korisnici', icon: '👥', label: 'Korisnici' },
+    { path: '/admin/objekti', icon: '🏢', label: 'Objekti' },
+    { path: '/admin/ugostitelji', icon: '👨‍🍳', label: 'Ugostitelji' },
+    { path: '/admin/artikli', icon: '🍽️', label: 'Artikli' },
+    { path: '/admin/kategorije', icon: '📑', label: 'Kategorije' },
+    { path: '/admin/akcije', icon: '🏷️', label: 'Akcije' }
+  ];
+
+}

@@ -1,0 +1,429 @@
+.korisnici-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// Header
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+
+  .header-left {
+    h2 {
+      margin: 0 0 5px 0;
+      color: #333;
+      font-size: 24px;
+    }
+
+    p {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+    }
+  }
+
+  .header-right {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+// Search box
+.search-box {
+  .search-input {
+    padding: 8px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    width: 250px;
+    font-size: 14px;
+    transition: all 0.3s;
+
+    &:focus {
+      outline: none;
+      border-color: #4a47a3;
+      box-shadow: 0 0 0 3px rgba(74, 71, 163, 0.1);
+    }
+  }
+}
+
+// Card
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+  h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .card-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+// Form grid
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.form-group {
+  .full-width {
+    grid-column: span 2;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s;
+
+    &:focus {
+      outline: none;
+      border-color: #4a47a3;
+      box-shadow: 0 0 0 3px rgba(74, 71, 163, 0.1);
+    }
+
+    &::placeholder {
+      color: #aaa;
+    }
+  }
+
+  .help-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #888;
+  }
+}
+
+.error-text {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+// Form actions
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+
+  &.full-width {
+    grid-column: span 2;
+  }
+}
+
+// Buttons
+.btn-primary {
+  background: #4a47a3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+
+  &:hover:not(:disabled) {
+    background: #3a3780;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 71, 163, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+
+  &:hover {
+    background: #5a6268;
+  }
+}
+
+// Table
+.table-responsive {
+  overflow-x: auto;
+}
+
+.korisnici-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    padding: 15px;
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  td {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover {
+    background: #f8f9fa;
+  }
+
+  .edit-row {
+    background: #fff3cd;
+
+    &:hover {
+      background: #fff3cd;
+    }
+  }
+}
+
+// Badges
+.id-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #e9ecef;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.role-admin {
+    background: #dc3545;
+    color: white;
+  }
+
+  &.role-putnik {
+    background: #28a745;
+    color: white;
+  }
+
+  &.role-ugostitelj {
+    background: #ffc107;
+    color: #212529;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #e9ecef;
+  color: #495057;
+
+  &.status-active {
+    background: #d4edda;
+    color: #155724;
+  }
+}
+
+// Icon buttons
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 0 3px;
+  transition: all 0.2s;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &.btn-edit {
+    background: #4a47a3;
+    color: white;
+
+    &:hover {
+      background: #3a3780;
+    }
+  }
+
+  &.btn-deactivate {
+    background: #dc3545;
+    color: white;
+
+    &:hover {
+      background: #c82333;
+    }
+  }
+
+  &.btn-activate {
+    background: #28a745;
+    color: white;
+
+    &:hover {
+      background: #218838;
+    }
+  }
+}
+
+.btn-save {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 5px;
+  font-size: 12px;
+
+  &:hover {
+    background: #218838;
+  }
+}
+
+.btn-cancel {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+
+  &:hover {
+    background: #c82333;
+  }
+}
+
+// Edit inputs
+.edit-input, .edit-select {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #4a47a3;
+  }
+}
+
+// Loading state
+.loading-state {
+  text-align: center;
+  padding: 50px;
+  color: #666;
+
+  .spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4a47a3;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Alerts
+.alert {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+  &.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+
+  &.alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+}
+
+// No results
+.no-results {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-style: italic;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+
+    .full-width {
+      grid-column: span 1;
+    }
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+
+    .header-right {
+      flex-direction: column;
+
+      .search-input {
+        width: 100%;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
