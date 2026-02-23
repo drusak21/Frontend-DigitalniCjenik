@@ -400,30 +400,3 @@
   font-style: italic;
 }
 
-// Responsive
-@media (max-width: 768px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-
-    .full-width {
-      grid-column: span 1;
-    }
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: stretch;
-
-    .header-right {
-      flex-direction: column;
-
-      .search-input {
-        width: 100%;
-      }
-
-      button {
-        width: 100%;
-      }
-    }
-  }
-}
