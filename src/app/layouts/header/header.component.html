@@ -1,0 +1,16 @@
+<header class="main-header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a routerLink="/">Digitalni Cjenik</a>
+    </div>
+    
+    <div class="navbar-menu">
+      @if (isLoggedIn) {
+        <span class="user-info">
+          {{ userIme }} ({{ userUloga }})
+        </span>
+        <button (click)="logout()" class="btn-logout">Odjava</button>
+      }
+    </div>
+  </nav>
+</header>
