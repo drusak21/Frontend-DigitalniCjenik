@@ -178,7 +178,7 @@
     {{ korisnik.ulogaNaziv }}
   </span>
 </td>
-            <td>{{ korisnik.jezikSucelja }}</td>
+            <td>{{ korisnik['jezikSučelja'] }}</td>
             <td>
               <span class="status-badge" [class.status-active]="korisnik.aktivnost">
                 {{ korisnik.aktivnost ? 'Aktivan' : 'Neaktivan' }}

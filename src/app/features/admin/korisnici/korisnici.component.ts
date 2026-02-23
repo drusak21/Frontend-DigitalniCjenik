@@ -20,7 +20,7 @@ export class KorisniciComponent implements OnInit {
     email: '',
     lozinka: '',
     ulogaID: 3,  // 3 je Putnik (iz backend loga)
-    jezikSucelja: 'HR'
+    jezikSučelja: 'HR'
   };
 
   editKorisnik: Korisnik | null = null;
@@ -28,7 +28,7 @@ export class KorisniciComponent implements OnInit {
     imePrezime: '',
     email: '',
     ulogaID: 3,
-    jezikSucelja: 'HR'
+    jezikSučelja: 'HR'
   };
   
   loading = false;
@@ -112,7 +112,7 @@ export class KorisniciComponent implements OnInit {
       imePrezime: korisnik.imePrezime,
       email: korisnik.email,
       ulogaID: uloga ? uloga.id : 3, 
-      jezikSucelja: korisnik.jezikSucelja || 'HR'
+      jezikSučelja: korisnik.jezikSučelja || 'HR'
     };
   }
 
@@ -125,7 +125,7 @@ export class KorisniciComponent implements OnInit {
       imePrezime: this.editData.imePrezime,
       email: this.editData.email,
       ulogaID: this.editData.ulogaID,
-      jezikSucelja: this.editData.jezikSucelja
+      jezikSučelja: this.editData.jezikSučelja
     }).subscribe({
       next: (updatedKorisnik: Korisnik) => {
         // Osvježi listu korisnika
@@ -186,7 +186,7 @@ export class KorisniciComponent implements OnInit {
       email: '',
       lozinka: '',
       ulogaID: 3,
-      jezikSucelja: 'HR'
+      jezikSučelja: 'HR'
     };
     this.editKorisnik = null;
     this.errorMessage = '';

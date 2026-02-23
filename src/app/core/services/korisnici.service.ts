@@ -83,7 +83,7 @@ export class KorisniciService {
           imePrezime: korisnik.imePrezime,
           email: korisnik.email,
           ulogaID: ulogaID,
-          jezikSucelja: korisnik.jezikSucelja || 'HR',
+          jezikSucelja: korisnik.jezikSučelja || 'HR',
           aktivnost: true,
           lozinka: '' // Prazna lozinka - backend ignorira za LDAP ili ne mijenja
         };

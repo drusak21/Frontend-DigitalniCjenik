@@ -4,7 +4,7 @@ export interface Korisnik {
   email: string;
   ulogaNaziv: string;        // ← Ovo je ono što backend vraća
   opisUloge?: string;        
-  jezikSucelja?: string;
+  jezikSučelja?: string;
   aktivnost: boolean;
 }
 
@@ -18,14 +18,14 @@ export interface CreateKorisnikRequest {
   email: string;
   lozinka?: string;
   ulogaID: number;          
-  jezikSucelja?: string;
+  jezikSučelja?: string;
 }
 
 export interface UpdateKorisnikRequest {
   imePrezime?: string;
   email?: string;
   ulogaID?: number;
-  jezikSucelja?: string;
+  jezikSučelja?: string;
   aktivnost?: boolean;
 }
 
