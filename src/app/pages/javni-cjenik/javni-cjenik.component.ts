@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-javni-cjenik',
@@ -17,7 +18,7 @@ export class JavniCjenikComponent implements OnInit {
   jezik: string = 'HR';
   isLoggedIn: boolean = false;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
      this.qrKod = this.route.snapshot.paramMap.get('qrKod') || 'default';
@@ -80,4 +81,10 @@ export class JavniCjenikComponent implements OnInit {
   promijeniJezik() {
     this.jezik = this.jezik === 'HR' ? 'EN' : 'HR';
   }
+
+  logout() {
+  this.authService.logout();
+  this.isLoggedIn = false;
+  this.router.navigate(['/cjenik', this.qrKod]);
+}
 }

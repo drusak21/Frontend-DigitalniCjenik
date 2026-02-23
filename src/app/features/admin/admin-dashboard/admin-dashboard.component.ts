@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -10,7 +11,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent {
-   menuItems = [
+  
+  menuItems = [
     { path: '/admin/korisnici', icon: '👥', label: 'Korisnici' },
     { path: '/admin/objekti', icon: '🏢', label: 'Objekti' },
     { path: '/admin/ugostitelji', icon: '👨‍🍳', label: 'Ugostitelji' },
@@ -19,4 +21,13 @@ export class AdminDashboardComponent {
     { path: '/admin/akcije', icon: '🏷️', label: 'Akcije' }
   ];
 
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/cjenik/default']);
+  }
 }
