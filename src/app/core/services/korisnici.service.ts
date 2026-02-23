@@ -65,9 +65,8 @@ export class KorisniciService {
     );
   }
 
-  // Aktivacija korisnika - šaljemo sva polja
+  // Aktivacija korisnika 
   aktivirajKorisnika(id: number): Observable<any> {
-    // Prvo dohvati sve korisnike da nađemo tog korisnika
     return this.getKorisnici().pipe(
       map(korisnici => {
         const korisnik = korisnici.find(k => k.id === id);
@@ -75,17 +74,17 @@ export class KorisniciService {
           throw new Error('Korisnik nije pronađen');
         }
         
-        // Pretvori ulogaNaziv u ulogaID
+
         const ulogaID = this.getUlogaIdByNaziv(korisnik.ulogaNaziv);
         
-        // Vrati kompletne podatke za update (sva polja koja backend očekuje)
+
         return {
           imePrezime: korisnik.imePrezime,
           email: korisnik.email,
           ulogaID: ulogaID,
           jezikSucelja: korisnik.jezikSučelja || 'HR',
           aktivnost: true,
-          lozinka: '' // Prazna lozinka - backend ignorira za LDAP ili ne mijenja
+          lozinka: '' 
         };
       }),
       switchMap(updateData => 
@@ -101,7 +100,7 @@ export class KorisniciService {
     );
   }
 
-  // Pomoćna metoda za mapiranje naziva uloge u ID
+
   getUlogaIdByNaziv(naziv: string): number {
     const mapa: { [key: string]: number } = {
       'Administrator': 1,

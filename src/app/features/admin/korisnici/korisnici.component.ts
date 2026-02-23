@@ -197,7 +197,7 @@ export class KorisniciComponent implements OnInit {
     this.editData = {};
   }
 
-  // Jednostavno - samo vrati ulogaNaziv iz korisnika
+  
   getNazivUloge(ulogaNaziv: string): string {
     return ulogaNaziv || 'Nepoznato';
   }
