@@ -1,216 +1,348 @@
-/* Mobile first - osnovni stilovi za mobilne uređaje */
+// ===============================
+// VARIJABLE (modernija paleta)
+// ===============================
+$primary: #1f2a37;
+$secondary: #2563eb;
+$accent: #fbbf24;
+$success: #16a34a;
+$light-bg: #f9fafb;
+$white: #ffffff;
+$gray-light: #e5e7eb;
+$gray: #6b7280;
+$dark: #111827;
+
+// ===============================
+// MIXINI
+// ===============================
+@mixin transition {
+  transition: all 0.25s ease;
+}
+
+// ===============================
+// RESET
+// ===============================
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// ===============================
+// MOBILE CONTAINER
+// ===============================
 .mobile-container {
   max-width: 100%;
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: $light-bg;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Header */
+// ===============================
+// HEADER
+// ===============================
 .header {
-  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-  color: white;
-  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba($primary, 0.96),
+    rgba($secondary, 0.96)
+  );
+  backdrop-filter: blur(6px);
+  color: $white;
+  padding: 1.1rem 1rem;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+
+  &-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+  }
+
+  &-actions {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .qr-info {
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    background: rgba(255,255,255,0.15);
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    display: inline-block;
+  }
 }
 
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.header-top h1 {
-  font-size: 1.2rem;
-  margin: 0;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 60%;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.lang-btn {
+.lang-btn,
+.login-link,
+.admin-link {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: $white;
   background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.3);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.login-link, .admin-link {
-  color: white;
+  border: 1px solid rgba(255,255,255,0.25);
   text-decoration: none;
-  padding: 0.4rem 0.8rem;
-  background: rgba(255,255,255,0.2);
-  border-radius: 20px;
-  font-size: 0.9rem;
+  cursor: pointer;
+  @include transition;
+
+  &:hover {
+    background: rgba(255,255,255,0.35);
+  }
 }
 
-.qr-info {
-  font-size: 0.8rem;
-  opacity: 0.8;
-}
-
-/* Kategorije - horizontalno skrolanje */
+// ===============================
+// KATEGORIJE
+// ===============================
 .kategorije-container {
-  background: white;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
+  background: $white;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid $gray-light;
   position: sticky;
-  top: 70px;
+  top: 68px;
   z-index: 99;
-}
 
-.kategorije-scroll {
-  display: flex;
-  overflow-x: auto;
-  gap: 0.5rem;
-  padding: 0 1rem;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
-}
+  .kategorije-scroll {
+    display: flex;
+    gap: 0.6rem;
+    overflow-x: auto;
+    scrollbar-width: none;
 
-.kategorije-scroll::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 
 .kategorija-btn {
-  flex: 0 0 auto;
-  padding: 0.6rem 1.2rem;
-  border: 1px solid #e0e0e0;
-  background: white;
-  border-radius: 30px;
+  padding: 0.55rem 1.3rem;
+  border-radius: 999px;
+  border: 1px solid $gray-light;
+  background: $white;
+  color: $gray;
   font-size: 0.9rem;
-  color: #666;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.3s ease;
+  @include transition;
+
+  &:hover {
+    background: $light-bg;
+  }
+
+  &.active {
+    background: $secondary;
+    color: $white;
+    border-color: $secondary;
+    box-shadow: 0 4px 10px rgba($secondary, 0.35);
+  }
 }
 
-.kategorija-btn.active {
-  background: #3498db;
-  color: white;
-  border-color: #3498db;
-}
-
-/* Proizvodi */
+// ===============================
+// PROIZVODI
+// ===============================
 .proizvodi-container {
-  padding: 1rem;
-  padding-bottom: 80px; /* Prostor za bottom nav */
+  padding: 1.4rem 1.1rem 90px;
+  max-width: 620px;
+  margin: 0 auto;
 }
 
 .kategorija-section {
-  margin-bottom: 2rem;
-}
+  margin-bottom: 2.2rem;
 
-.kategorija-naslov {
-  font-size: 1.1rem;
-  color: #2c3e50;
-  margin-bottom: 0.8rem;
-  padding-left: 0.5rem;
-  border-left: 4px solid #3498db;
+  .kategorija-naslov {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: $primary;
+    margin-bottom: 1rem;
+    padding-left: 0.6rem;
+    border-left: 4px solid $secondary;
+    letter-spacing: -0.2px;
+  }
 }
 
 .proizvod-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 0.8rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  background: $white;
+  border-radius: 18px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.7rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: transform 0.2s;
+  border: 1px solid rgba($gray-light, 0.7);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  @include transition;
+
+  &:hover {
+    transform: translateX(6px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    border-color: $secondary;
+  }
+
+  .proizvod-info {
+    flex: 1;
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: $dark;
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  .brand-badge {
+    display: inline-block;
+    background: $accent;
+    color: $primary;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .proizvod-cijena {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: $success;
+    background: rgba($success, 0.12);
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    margin-left: 1rem;
+    white-space: nowrap;
+  }
 }
 
-.proizvod-card:active {
-  transform: scale(0.98);
-}
-
-.proizvod-info {
-  flex: 1;
-}
-
-.proizvod-info h3 {
-  font-size: 1rem;
-  margin: 0 0 0.3rem 0;
-  color: #2c3e50;
-}
-
-.brand-badge {
-  display: inline-block;
-  background: #f1c40f;
-  color: #2c3e50;
-  font-size: 0.7rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  font-weight: 600;
-}
-
-.proizvod-cijena {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #27ae60;
-  margin-left: 1rem;
-}
-
-/* Bottom Navigation */
+// ===============================
+// BOTTOM NAVIGATION
+// ===============================
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: white;
+  background: $white;
   display: flex;
   justify-content: space-around;
-  padding: 0.5rem;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  padding: 0.75rem 0.4rem;
+  border-top: 1px solid $gray-light;
+  box-shadow: 0 -6px 18px rgba(0,0,0,0.08);
   z-index: 100;
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-decoration: none;
+    padding: 0.35rem 1.1rem;
+    border-radius: 999px;
+    @include transition;
+
+    span {
+      font-size: 1.3rem;
+      margin-bottom: 0.15rem;
+    }
+
+    &:hover {
+      color: $secondary;
+    }
+
+    &.active {
+      color: $secondary;
+      background: rgba($secondary, 0.12);
+    }
+  }
 }
 
-.nav-item {
+// ===============================
+// LOADING & EMPTY STATE
+// ===============================
+.loading {
+  min-height: 50vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-decoration: none;
-  color: #999;
-  font-size: 0.8rem;
-  padding: 0.3rem 1rem;
-  border-radius: 20px;
+  justify-content: center;
+
+  .spinner {
+    width: 38px;
+    height: 38px;
+    border: 3px solid rgba($secondary, 0.25);
+    border-top-color: $secondary;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: $gray;
+  }
 }
 
-.nav-item.active {
-  color: #3498db;
-  background: #ebf5ff;
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: $gray;
+
+  .empty-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  p {
+    margin-bottom: 1.4rem;
+    font-size: 1.05rem;
+  }
+
+  button {
+    background: $secondary;
+    color: $white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    @include transition;
+
+    &:hover {
+      background: darken($secondary, 8%);
+      transform: translateY(-2px);
+    }
+  }
 }
 
-.nav-item span {
-  font-size: 1.3rem;
-  margin-bottom: 0.2rem;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-/* Tablet i veći ekrani */
+// ===============================
+// TABLET
+// ===============================
 @media (min-width: 768px) {
   .mobile-container {
-    max-width: 768px;
+    max-width: 760px;
     margin: 0 auto;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    box-shadow: 0 0 40px rgba(0,0,0,0.15);
   }
-  
+
+  .proizvodi-container {
+    padding: 2rem;
+  }
+
   .proizvod-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateX(8px);
   }
 }
