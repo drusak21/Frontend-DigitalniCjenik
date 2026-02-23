@@ -1,0 +1,9 @@
+<div class="dashboard-container">
+  <h1>Dobrodošli, {{ korisnikIme }}!</h1>
+  <p>Vaša uloga: {{ korisnikUloga }}</p>
+  
+  <div class="menu">
+    <a routerLink="/cjenik/test">Pregledaj cjenik</a><br>
+    <button (click)="logout()">Odjava</button>
+  </div>
+</div>

@@ -1,0 +1,46 @@
+<div class="login-container">
+  <div class="login-box">
+    <h2>Digitalni Cjenik</h2>
+    <h3>Prijava u sustav</h3>
+    
+    <form (ngSubmit)="login()" #loginForm="ngForm">
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input 
+          type="email" 
+          id="email"
+          [(ngModel)]="email" 
+          name="email"
+          required
+          #emailInput="ngModel"
+          placeholder="Unesite email">
+        <div *ngIf="emailInput.invalid && emailInput.touched" class="error">
+          Email je obavezan
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="lozinka">Lozinka:</label>
+        <input 
+          type="password" 
+          id="lozinka"
+          [(ngModel)]="lozinka" 
+          name="lozinka"
+          required
+          #lozinkaInput="ngModel"
+          placeholder="Unesite lozinku">
+        <div *ngIf="lozinkaInput.invalid && lozinkaInput.touched" class="error">
+          Lozinka je obavezna
+        </div>
+      </div>
+
+      <div *ngIf="poruka" class="alert alert-danger">
+        {{ poruka }}
+      </div>
+
+      <button type="submit" [disabled]="loginForm.invalid">
+        Prijavi se
+      </button>
+    </form>
+  </div>
+</div>

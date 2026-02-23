@@ -1,0 +1,102 @@
+<div class="mobile-container">
+  <!-- Header sa nazivom objekta -->
+  <div class="header">
+    <div class="header-top">
+      <h1>{{ objektNaziv }}</h1>
+      <div class="header-actions">
+  <button (click)="promijeniJezik()" class="lang-btn">
+    {{ jezik }}
+  </button>
+  @if (!isLoggedIn) {
+    <a routerLink="/login" class="login-link">Prijava</a>
+  } @else {
+    <a routerLink="/dashboard" class="admin-link">Administracija</a> 
+  }
+</div>
+    </div>
+    
+    <!-- QR Kod informacija -->
+    <div class="qr-info">
+      <small>QR kod: {{ qrKod }}</small>
+    </div>
+  </div>
+
+  <!-- Kategorije - horizontalno skrolanje (mobile first) -->
+  <div class="kategorije-container">
+    <div class="kategorije-scroll">
+      @for (kategorija of kategorije; track kategorija.id) {
+        <button 
+          class="kategorija-btn"
+          [class.active]="aktivnaKategorija === kategorija.id"
+          (click)="promijeniKategoriju(kategorija.id)">
+          {{ kategorija.naziv }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Proizvodi -->
+  <div class="proizvodi-container">
+    @if (aktivnaKategorija === 0) {
+      <!-- Prikaži sve kategorije -->
+      @for (kategorija of kategorije.slice(1); track kategorija.id) {
+        <div class="kategorija-section">
+          <h2 class="kategorija-naslov">{{ kategorija.naziv }}</h2>
+          @for (proizvod of kategorija.proizvodi; track proizvod.naziv) {
+            <div class="proizvod-card">
+              <div class="proizvod-info">
+                <h3>{{ proizvod.naziv }}</h3>
+                @if (proizvod.brand === 'PanonskiIzvori') {
+                  <span class="brand-badge">Panonski Izvori</span>
+                }
+              </div>
+              <div class="proizvod-cijena">
+                {{ proizvod.cijena }}
+              </div>
+            </div>
+          }
+        </div>
+      }
+    } @else {
+      <!-- Prikaži samo odabranu kategoriju -->
+      @for (kategorija of kategorije; track kategorija.id) {
+        @if (kategorija.id === aktivnaKategorija) {
+          <div class="kategorija-section">
+            <h2 class="kategorija-naslov">{{ kategorija.naziv }}</h2>
+            @for (proizvod of kategorija.proizvodi; track proizvod.naziv) {
+              <div class="proizvod-card">
+                <div class="proizvod-info">
+                  <h3>{{ proizvod.naziv }}</h3>
+                  @if (proizvod.brand === 'PanonskiIzvori') {
+                    <span class="brand-badge">Panonski Izvori</span>
+                  }
+                </div>
+                <div class="proizvod-cijena">
+                  {{ proizvod.cijena }}
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+  </div>
+
+
+  @if (isLoggedIn) {
+    <div class="bottom-nav">
+      <a routerLink="/" class="nav-item active">
+        <span>🏠</span>
+        <small>Početna</small>
+      </a>
+      <a routerLink="/admin" class="nav-item">
+        <span>📊</span>
+        <small>Admin</small>
+      </a>
+      <a routerLink="/ugostitelj" class="nav-item">
+        <span>📝</span>
+        <small>Uređivanje</small>
+      </a>
+    </div>
+  }
+</div>
