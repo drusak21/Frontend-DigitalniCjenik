@@ -1,100 +1,129 @@
 <div class="mobile-container">
-  <!-- Header sa nazivom objekta -->
+  <!-- Header -->
   <div class="header">
     <div class="header-top">
       <h1>{{ objektNaziv }}</h1>
       <div class="header-actions">
-  <button (click)="promijeniJezik()" class="lang-btn">
-    {{ jezik }}
-  </button>
-  @if (!isLoggedIn) {
-    <a routerLink="/login" class="login-link">Prijava</a>
-  } @else {
-    <a routerLink="/admin" class="admin-link">Administracija</a> 
-    <button (click)="logout()" class="logout-btn">Odjava</button>
-  }
-</div>
+        <button (click)="promijeniJezik()" class="lang-btn">
+          {{ jezik }}
+        </button>
+        @if (!isLoggedIn) {
+          <a routerLink="/login" class="login-link">{{ getText('prijava') }}</a>
+        } @else {
+          <a routerLink="/admin" class="admin-link">{{ getText('administracija') }}</a>
+        }
+      </div>
     </div>
     
-    <!-- QR Kod informacija -->
     <div class="qr-info">
-      <small>QR kod: {{ qrKod }}</small>
+      <small>{{ getText('qrKod') }}: {{ qrKod }}</small>
     </div>
   </div>
 
-  <!-- Kategorije - horizontalno skrolanje (mobile first) -->
-  <div class="kategorije-container">
-    <div class="kategorije-scroll">
-      @for (kategorija of kategorije; track kategorija.id) {
-        <button 
-          class="kategorija-btn"
-          [class.active]="aktivnaKategorija === kategorija.id"
-          (click)="promijeniKategoriju(kategorija.id)">
-          {{ kategorija.naziv }}
-        </button>
-      }
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>{{ getText('ucitavanje') }}</p>
     </div>
-  </div>
+  }
 
-  <!-- Proizvodi -->
-  <div class="proizvodi-container">
-    @if (aktivnaKategorija === 0) {
-      <!-- Prikaži sve kategorije -->
-      @for (kategorija of kategorije.slice(1); track kategorija.id) {
-        <div class="kategorija-section">
-          <h2 class="kategorija-naslov">{{ kategorija.naziv }}</h2>
-          @for (proizvod of kategorija.proizvodi; track proizvod.naziv) {
-            <div class="proizvod-card">
-              <div class="proizvod-info">
-                <h3>{{ proizvod.naziv }}</h3>
-                @if (proizvod.brand === 'PanonskiIzvori') {
-                  <span class="brand-badge">Panonski Izvori</span>
-                }
-              </div>
-              <div class="proizvod-cijena">
-                {{ proizvod.cijena }}
-              </div>
-            </div>
+  <!-- Error State -->
+  @if (error && !loading) {
+    <div class="error-state">
+      <div class="error-icon">⚠️</div>
+      <p>{{ getText('error') }}</p>
+      <button (click)="ucitajPodatke()" class="retry-btn">
+        {{ getText('pokusajPonovo') }}
+      </button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading && !error) {
+    <!-- Ako nema artikala -->
+    @if (kategorije.length === 0) {
+      <div class="empty-state">
+        <p>{{ getText('nemaArtikala') }}</p>
+      </div>
+    }
+
+    <!-- Kategorije - prikaži samo ako ih ima više od 1 (plus "Sve") -->
+    @if (kategorije.length > 0) {
+      <div class="kategorije-container">
+        <div class="kategorije-scroll">
+          @for (kategorija of sveKategorije; track kategorija.id) {
+            <button 
+              class="kategorija-btn"
+              [class.active]="aktivnaKategorija === kategorija.id"
+              (click)="promijeniKategoriju(kategorija.id)">
+              {{ kategorija.naziv }}
+            </button>
           }
         </div>
-      }
-    } @else {
-      <!-- Prikaži samo odabranu kategoriju -->
-      @for (kategorija of kategorije; track kategorija.id) {
-        @if (kategorija.id === aktivnaKategorija) {
+      </div>
+    }
+
+    <!-- Proizvodi -->
+    <div class="proizvodi-container">
+      @if (aktivnaKategorija === 0) {
+        <!-- Prikaži sve kategorije -->
+        @for (kategorija of kategorije; track kategorija.id) {
           <div class="kategorija-section">
             <h2 class="kategorija-naslov">{{ kategorija.naziv }}</h2>
-            @for (proizvod of kategorija.proizvodi; track proizvod.naziv) {
+            @for (proizvod of kategorija.proizvodi; track proizvod.artiklID) {
               <div class="proizvod-card">
                 <div class="proizvod-info">
-                  <h3>{{ proizvod.naziv }}</h3>
-                  @if (proizvod.brand === 'PanonskiIzvori') {
+                  <h3>{{ proizvod.artiklNaziv }}</h3>
+                  @if (proizvod.zakljucan) {
                     <span class="brand-badge">Panonski Izvori</span>
                   }
                 </div>
                 <div class="proizvod-cijena">
-                  {{ proizvod.cijena }}
+                  {{ formatCijena(proizvod.cijena) }}
                 </div>
               </div>
             }
           </div>
         }
+      } @else {
+        <!-- Prikaži samo odabranu kategoriju -->
+        @for (kategorija of kategorije; track kategorija.id) {
+          @if (kategorija.id === aktivnaKategorija) {
+            <div class="kategorija-section">
+              <h2 class="kategorija-naslov">{{ kategorija.naziv }}</h2>
+              @for (proizvod of kategorija.proizvodi; track proizvod.artiklID) {
+                <div class="proizvod-card">
+                  <div class="proizvod-info">
+                    <h3>{{ proizvod.artiklNaziv }}</h3>
+                    @if (proizvod.zakljucan) {
+                      <span class="brand-badge">Panonski Izvori</span>
+                    }
+                  </div>
+                  <div class="proizvod-cijena">
+                    {{ formatCijena(proizvod.cijena) }}
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
       }
-    }
-  </div>
+    </div>
+  }
 
-
+  <!-- Bottom Navigation (samo za prijavljene) -->
   @if (isLoggedIn) {
     <div class="bottom-nav">
-      <a routerLink="/" class="nav-item active">
+      <a routerLink="/" class="nav-item" routerLinkActive="active" >
         <span>🏠</span>
         <small>Početna</small>
       </a>
-      <a routerLink="/admin" class="nav-item">
+      <a routerLink="/admin" class="nav-item" routerLinkActive="active">
         <span>📊</span>
         <small>Admin</small>
       </a>
-      <a routerLink="/ugostitelj" class="nav-item">
+      <a routerLink="/dashboard" class="nav-item" routerLinkActive="active">
         <span>📝</span>
         <small>Uređivanje</small>
       </a>

@@ -1,9 +1,19 @@
 export interface Cjenik {
   id: number;
   naziv: string;
-  objektId: number;
-  status: 'aktivni' | 'u_pripremi' | 'na_potvrdi' | 'arhiviran';
-  datumKreiranja: Date;
-  datumPotvrde?: Date;
-  potvrdioPutnikId?: number;
+  status: string; // 'aktivan', 'arhiviran', itd.
+  datumKreiranja: string;
+  datumPotvrde: string | null;
+  objektID: number;
+  objektNaziv: string;
+  brojArtikala: number;
+  artikli: ArtiklUCjeniku[];
+}
+
+export interface ArtiklUCjeniku {
+  artiklID: number;
+  artiklNaziv: string;
+  cijena: number;
+  redoslijedPrikaza: number;
+  zakljucan: boolean;
 }

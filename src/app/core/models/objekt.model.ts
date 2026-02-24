@@ -4,6 +4,6 @@ export interface Objekt {
   adresa: string;
   qrKod: string;
   aktivnost: boolean;
-  ugostiteljId: number;
-  putnikId: number; 
+  ugostiteljID: number;
+  putnikID: number; 
 }
