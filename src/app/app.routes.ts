@@ -31,6 +31,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+  path: 'putnik',
+  loadChildren: () => import('./features/putnik/putnik.routes').then(m => m.PUTNIK_ROUTES),
+  canActivate: [authGuard]
+  },
+  {
     path: '**',
     loadComponent: () => 
       import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent)

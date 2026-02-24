@@ -1,0 +1,101 @@
+<div class="putnik-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>Putnik Dashboard</h2>
+      <p *ngIf="objekti.length">Pregled objekata koje nadzirete</p>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="🔍 Pretraži objekte..."
+          class="search-input">
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistika -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">🏢</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ ukupnoObjekata }}</span>
+        <span class="stat-label">Ukupno objekata</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ aktivnihObjekata }}</span>
+        <span class="stat-label">Aktivnih</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⏸️</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ neaktivnihObjekata }}</span>
+        <span class="stat-label">Neaktivnih</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifikacije -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Učitavanje objekata...</p>
+  </div>
+
+  <!-- Tablica objekata -->
+  <div class="card" *ngIf="!loading && objekti.length > 0">
+    <h3>
+      <span class="card-icon">📋</span>
+      Objekti pod vašim nadzorom
+    </h3>
+    <div class="table-responsive">
+      <table class="objekti-table">
+        <thead>
+          <tr>
+            <th>Naziv</th>
+            <th>Adresa</th>
+            <th>Ugostitelj</th>
+            <th>QR kod</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let objekt of filtriraniObjekti">
+            <td>{{ objekt.naziv }}</td>
+            <td>{{ objekt.adresa }}</td>
+            <td>{{ objekt.ugostiteljNaziv || 'Nepoznato' }}</td>
+            <td>
+              <button class="btn-icon btn-qr" 
+                      (click)="otvoriQRPreview(objekt)" 
+                      [title]="'Prikaži QR kod: ' + objekt.qrKod">
+                🖼️
+              </button>
+            </td>
+            <td>
+              <span class="status-badge" [class]="getStatusClass(objekt.aktivnost)">
+                {{ getStatusText(objekt.aktivnost) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Nema objekata -->
+  <div class="empty-state" *ngIf="!loading && objekti.length === 0">
+    <div class="empty-icon">🏢</div>
+    <h3>Nema dodijeljenih objekata</h3>
+    <p>Trenutno nemate objekata za nadzor.</p>
+  </div>
+</div>

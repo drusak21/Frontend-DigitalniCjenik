@@ -7,10 +7,26 @@
         <button (click)="promijeniJezik()" class="lang-btn">
           {{ jezik }}
         </button>
+        
         @if (!isLoggedIn) {
           <a routerLink="/login" class="login-link">{{ getText('prijava') }}</a>
         } @else {
-          <a routerLink="/admin" class="admin-link">{{ getText('administracija') }}</a>
+          <!-- Administrator -->
+          @if (korisnikUloga === 'Administrator') {
+            <a routerLink="/admin" class="admin-link">{{ getText('administracija') }}</a>
+          }
+          
+          <!-- Putnik -->
+          @if (korisnikUloga === 'Putnik') {
+            <a routerLink="/putnik" class="putnik-link">Putnik dashboard</a>
+          }
+          
+          <!-- Ugostitelj -->
+          @if (korisnikUloga === 'Ugostitelj') {
+            <a routerLink="/ugostitelj" class="ugostitelj-link">Ugostitelj dashboard</a>
+          }
+          
+          <button (click)="logout()" class="logout-btn">Odjava</button>
         }
       </div>
     </div>
@@ -48,7 +64,7 @@
       </div>
     }
 
-    <!-- Kategorije - prikaži samo ako ih ima više od 1 (plus "Sve") -->
+    <!-- Kategorije -->
     @if (kategorije.length > 0) {
       <div class="kategorije-container">
         <div class="kategorije-scroll">
@@ -115,18 +131,31 @@
   <!-- Bottom Navigation (samo za prijavljene) -->
   @if (isLoggedIn) {
     <div class="bottom-nav">
-      <a routerLink="/" class="nav-item" routerLinkActive="active" >
+      <a routerLink="/" class="nav-item" routerLinkActive="active">
         <span>🏠</span>
         <small>Početna</small>
       </a>
-      <a routerLink="/admin" class="nav-item" routerLinkActive="active">
-        <span>📊</span>
-        <small>Admin</small>
-      </a>
-      <a routerLink="/dashboard" class="nav-item" routerLinkActive="active">
-        <span>📝</span>
-        <small>Uređivanje</small>
-      </a>
+      
+      @if (korisnikUloga === 'Administrator') {
+        <a routerLink="/admin" class="nav-item" routerLinkActive="active">
+          <span>📊</span>
+          <small>Admin</small>
+        </a>
+      }
+      
+      @if (korisnikUloga === 'Putnik') {
+        <a routerLink="/putnik" class="nav-item" routerLinkActive="active">
+          <span>👁️</span>
+          <small>Nadzor</small>
+        </a>
+      }
+      
+      @if (korisnikUloga === 'Ugostitelj') {
+        <a routerLink="/ugostitelj" class="nav-item" routerLinkActive="active">
+          <span>📝</span>
+          <small>Uređivanje</small>
+        </a>
+      }
     </div>
   }
 </div>

@@ -30,6 +30,7 @@ export class JavniCjenikComponent implements OnInit {
   isLoggedIn: boolean = false;
   loading: boolean = true;
   error: boolean = false;
+  korisnikUloga: string = '';
 
   // Mapa kategorija prema tvojoj bazi
   kategorijeMap: Map<number, string> = new Map([
@@ -80,8 +81,11 @@ export class JavniCjenikComponent implements OnInit {
   }
 
   provjeriPrijavu() {
-    this.isLoggedIn = this.authService.isLoggedIn();
+  this.isLoggedIn = this.authService.isLoggedIn();
+  if (this.isLoggedIn) {
+    this.korisnikUloga = this.authService.getUserRole() || '';
   }
+}
 
   ucitajPodatke() {
     this.loading = true;
@@ -239,5 +243,11 @@ export class JavniCjenikComponent implements OnInit {
     } else {
       return this.kategorije.filter(k => k.id === this.aktivnaKategorija);
     }
+  }
+
+   logout() {
+    this.authService.logout();
+    this.isLoggedIn = false;
+    this.korisnikUloga = '';
   }
 }
