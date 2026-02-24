@@ -6,7 +6,7 @@ import { CjeniciService } from '../../core/services/cjenici.service';
 import { ObjektiService } from '../../core/services/objekti.service';
 import { KategorijeService } from '../../core/services/kategorija.service';
 import { ArtiklUCjeniku } from '../../core/models/cjenik.model';
-import { Kategorija } from '../../core/models/kategorija.model';
+
 
 interface KategorijaPrikaz {
   id: number;
@@ -41,6 +41,15 @@ export class JavniCjenikComponent implements OnInit {
     [5, 'Deserti'],
     [6, 'Topli napitci']
   ]);
+
+  kategorijePrijevodi: Map<number, string> = new Map([
+  [1, 'Non-alcoholic drinks'],
+  [2, 'Alcoholic drinks'],
+  [3, 'Food'],
+  [4, 'Panonski Izvori'],
+  [5, 'Desserts'],
+  [6, 'Hot drinks']
+]);
 
   // Prijevodi
   translations: any = {
@@ -213,6 +222,13 @@ export class JavniCjenikComponent implements OnInit {
   promijeniJezik() {
     this.jezik = this.jezik === 'HR' ? 'EN' : 'HR';
   }
+
+  getNazivKategorije(kategorija: any): string {
+  if (this.jezik === 'EN') {
+    return this.kategorijePrijevodi.get(kategorija.id) || kategorija.naziv;
+  }
+  return kategorija.naziv;
+}
 
   getText(key: string): string {
     return this.translations[this.jezik][key] || key;

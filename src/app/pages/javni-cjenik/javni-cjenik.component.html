@@ -57,7 +57,6 @@
 
   <!-- Content -->
   @if (!loading && !error) {
-    <!-- Ako nema artikala -->
     @if (kategorije.length === 0) {
       <div class="empty-state">
         <p>{{ getText('nemaArtikala') }}</p>
@@ -73,7 +72,11 @@
               class="kategorija-btn"
               [class.active]="aktivnaKategorija === kategorija.id"
               (click)="promijeniKategoriju(kategorija.id)">
-              {{ kategorija.naziv }}
+              @if (kategorija.id === 0) {
+                {{ getText('sve') }}
+              } @else {
+                {{ getNazivKategorije(kategorija) }}
+              }
             </button>
           }
         </div>
@@ -86,7 +89,7 @@
         <!-- Prikaži sve kategorije -->
         @for (kategorija of kategorije; track kategorija.id) {
           <div class="kategorija-section">
-            <h2 class="kategorija-naslov">{{ kategorija.naziv }}</h2>
+            <h2 class="kategorija-naslov">{{ getNazivKategorije(kategorija) }}</h2>
             @for (proizvod of kategorija.proizvodi; track proizvod.artiklID) {
               <div class="proizvod-card">
                 <div class="proizvod-info">
@@ -103,11 +106,10 @@
           </div>
         }
       } @else {
-        <!-- Prikaži samo odabranu kategoriju -->
         @for (kategorija of kategorije; track kategorija.id) {
           @if (kategorija.id === aktivnaKategorija) {
             <div class="kategorija-section">
-              <h2 class="kategorija-naslov">{{ kategorija.naziv }}</h2>
+              <h2 class="kategorija-naslov">{{ getNazivKategorije(kategorija) }}</h2>
               @for (proizvod of kategorija.proizvodi; track proizvod.artiklID) {
                 <div class="proizvod-card">
                   <div class="proizvod-info">
