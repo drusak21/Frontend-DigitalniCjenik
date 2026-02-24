@@ -8,26 +8,11 @@
           {{ jezik }}
         </button>
         
-        @if (!isLoggedIn) {
-          <a routerLink="/login" class="login-link">{{ getText('prijava') }}</a>
-        } @else {
-          <!-- Administrator -->
-          @if (korisnikUloga === 'Administrator') {
-            <a routerLink="/admin" class="admin-link">{{ getText('administracija') }}</a>
-          }
-          
-          <!-- Putnik -->
-          @if (korisnikUloga === 'Putnik') {
-            <a routerLink="/putnik" class="putnik-link">Putnik dashboard</a>
-          }
-          
-          <!-- Ugostitelj -->
-          @if (korisnikUloga === 'Ugostitelj') {
-            <a routerLink="/ugostitelj" class="ugostitelj-link">Ugostitelj dashboard</a>
-          }
-          
-          <button (click)="logout()" class="logout-btn">Odjava</button>
-        }
+         @if (!isLoggedIn) {
+      <a routerLink="/login" class="login-link">{{ getText('prijava') }}</a>
+    } @else {
+      <button (click)="logout()" class="logout-btn">Odjava</button>
+    }
       </div>
     </div>
     
