@@ -1,0 +1,235 @@
+<div class="objekti-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>Upravljanje objektima</h2>
+      <p *ngIf="objekti.length">Ukupno objekata: {{ objekti.length }}</p>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="🔍 Pretraži objekte..."
+          class="search-input">
+      </div>
+      <button class="btn-primary" (click)="prikaziFormu = !prikaziFormu">
+        {{ prikaziFormu ? '✕ Zatvori' : '+ Dodaj objekt' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Notifikacije -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✅ {{ successMessage }}
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Forma za dodavanje -->
+  <div class="card" *ngIf="prikaziFormu">
+    <h3>
+      <span class="card-icon">🏢</span>
+      Dodaj novi objekt
+    </h3>
+    
+    <form (ngSubmit)="dodajObjekt()" #forma="ngForm" class="form-grid">
+      <div class="form-group">
+        <label for="naziv">Naziv objekta *</label>
+        <input 
+          type="text" 
+          id="naziv"
+          [(ngModel)]="noviObjekt.naziv" 
+          name="naziv" 
+          required
+          #naziv="ngModel"
+          placeholder="Unesite naziv objekta">
+        <div *ngIf="naziv.invalid && naziv.touched" class="error-text">
+          Naziv je obavezan
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="adresa">Adresa *</label>
+        <input 
+          type="text" 
+          id="adresa"
+          [(ngModel)]="noviObjekt.adresa" 
+          name="adresa" 
+          required
+          #adresa="ngModel"
+          placeholder="Unesite adresu">
+        <div *ngIf="adresa.invalid && adresa.touched" class="error-text">
+          Adresa je obavezna
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="ugostitelj">Ugostitelj *</label>
+        <select 
+          id="ugostitelj"
+          [(ngModel)]="noviObjekt.ugostiteljID" 
+          name="ugostitelj" 
+          required>
+          <option value="0" disabled selected>Odaberite ugostitelja</option>
+          <option *ngFor="let u of ugostitelji" [value]="u.id">
+            {{ u.imePrezime }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="putnik">Putnik (nadzor) *</label>
+        <select 
+          id="putnik"
+          [(ngModel)]="noviObjekt.putnikID" 
+          name="putnik" 
+          required>
+          <option value="0" disabled selected>Odaberite putnika</option>
+          <option *ngFor="let p of putnici" [value]="p.id">
+            {{ p.imePrezime }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-actions full-width">
+        <button type="submit" class="btn-primary" [disabled]="forma.invalid || loading">
+          <span *ngIf="loading">⏳ Dodavanje...</span>
+          <span *ngIf="!loading">✅ Dodaj objekt</span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="prikaziFormu = false; resetFormu()">
+          ✕ Odustani
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && !objekti.length" class="loading-state">
+    <div class="spinner"></div>
+    <p>Učitavanje objekata...</p>
+  </div>
+
+  <!-- Tablica objekata -->
+  <div class="card" *ngIf="!loading || objekti.length">
+    <div class="table-responsive">
+      <table class="objekti-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Naziv</th>
+            <th>Adresa</th>
+            <th>Ugostitelj</th>
+            <th>Putnik</th>
+            <th>QR kod</th>
+            <th>Status</th>
+            <th>Akcije</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Edit red -->
+          <tr *ngIf="editObjekt" class="edit-row">
+            <td>{{ editObjekt.id }}</td>
+            <td>
+              <input type="text" [(ngModel)]="editData.naziv" class="edit-input">
+            </td>
+            <td>
+              <input type="text" [(ngModel)]="editData.adresa" class="edit-input">
+            </td>
+            <td>
+              <select [(ngModel)]="editData.ugostiteljId" class="edit-select">
+                <option *ngFor="let u of ugostitelji" [value]="u.id">
+                  {{ u.imePrezime }}
+                </option>
+              </select>
+            </td>
+            <td>
+              <select [(ngModel)]="editData.putnikId" class="edit-select">
+                <option *ngFor="let p of putnici" [value]="p.id">
+                  {{ p.imePrezime }}
+                </option>
+              </select>
+            </td>
+            <td>🔲</td>
+            <td>
+              <span class="status-badge" [class.status-active]="editObjekt.aktivnost">
+                {{ editObjekt.aktivnost ? 'Aktivan' : 'Neaktivan' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-save" (click)="spremiIzmjene()" [disabled]="loading">
+                💾 Spremi
+              </button>
+              <button class="btn-cancel" (click)="cancelEdit()">
+                ✕ Odustani
+              </button>
+            </td>
+          </tr>
+
+          <!-- Redovi objekata -->
+          <tr *ngFor="let objekt of filtriraniObjekti">
+            <td><span class="id-badge">#{{ objekt.id }}</span></td>
+            <td>{{ objekt.naziv }}</td>
+            <td>{{ objekt.adresa }}</td>
+            <td>{{ getNazivUgostitelja(objekt.ugostiteljID) }}</td>
+            <td>{{ getImePutnika(objekt.putnikID) }}</td>
+            <td>
+  <div class="qr-cell">
+    <button class="btn-icon btn-qr" 
+        (click)="otvoriQRPreview(objekt)" 
+        [title]="'Prikaži QR kod: ' + objekt.qrKod">
+  🖼️
+</button>
+    <div *ngIf="prikaziQR === objekt.id" class="qr-preview">
+      <div *ngIf="objekt.qrKodBase64; else noQR">
+        <!-- QR slika -->
+        <img [src]="'data:image/png;base64,' + objekt.qrKodBase64" 
+             [alt]="'QR kod za ' + objekt.naziv"
+             [title]="'Kod: ' + objekt.qrKod"
+             class="qr-slika">
+        
+      </div>
+      <ng-template #noQR>
+        <p class="qr-error">QR kod nije dostupan</p>
+      </ng-template>
+    </div>
+  </div>
+</td>
+            <td>
+              <span class="status-badge" [class.status-active]="objekt.aktivnost">
+                {{ objekt.aktivnost ? 'Aktivan' : 'Neaktivan' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-icon btn-edit" (click)="urediObjekt(objekt)" 
+                      title="Uredi objekt">
+                ✎
+              </button>
+              <button *ngIf="objekt.aktivnost" 
+                      class="btn-icon btn-deactivate" 
+                      (click)="deaktivirajObjekt(objekt.id)"
+                      title="Deaktiviraj objekt">
+                🔴
+              </button>
+              <button *ngIf="!objekt.aktivnost" 
+                      class="btn-icon btn-activate" 
+                      (click)="aktivirajObjekt(objekt.id)"
+                      title="Aktiviraj objekt">
+                🟢
+              </button>
+            </td>
+          </tr>
+
+          <!-- Nema rezultata -->
+          <tr *ngIf="filtriraniObjekti.length === 0">
+            <td colspan="8" class="no-results">
+              Nema pronađenih objekata
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

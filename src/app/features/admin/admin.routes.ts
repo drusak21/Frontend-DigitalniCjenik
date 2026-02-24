@@ -18,6 +18,13 @@ export const ADMIN_ROUTES: Routes = [
         data: { uloge: ['Administrator'] }
       },
       {
+        path: 'objekti',
+        loadComponent: () => 
+          import('./objekti/objekti.component').then(m => m.ObjektiComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { uloge: ['Administrator'] }
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'korisnici'
