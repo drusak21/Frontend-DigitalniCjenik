@@ -25,6 +25,13 @@ export const ADMIN_ROUTES: Routes = [
         data: { uloge: ['Administrator'] }
       },
       {
+      path: 'ugostitelji',
+      loadComponent: () => 
+        import('./ugostitelji/ugostitelji.component').then(m => m.UgostiteljiComponent),
+      canActivate: [authGuard, roleGuard],
+      data: { uloge: ['Administrator'] }
+      } ,
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'korisnici'

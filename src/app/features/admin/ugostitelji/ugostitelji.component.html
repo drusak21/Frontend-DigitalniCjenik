@@ -1,0 +1,195 @@
+<div class="ugostitelji-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>Upravljanje ugostiteljima</h2>
+      <p *ngIf="ugostitelji.length">Ukupno ugostitelja: {{ ugostitelji.length }}</p>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="🔍 Pretraži ugostitelje..."
+          class="search-input">
+      </div>
+      <button class="btn-primary" (click)="prikaziFormu = !prikaziFormu">
+        {{ prikaziFormu ? '✕ Zatvori' : '+ Dodaj ugostitelja' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Notifikacije -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✅ {{ successMessage }}
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Forma za dodavanje -->
+  <div class="card" *ngIf="prikaziFormu">
+    <h3>
+      <span class="card-icon">👨‍🍳</span>
+      Dodaj novog ugostitelja
+    </h3>
+    
+    <form (ngSubmit)="dodajUgostitelja()" #forma="ngForm" class="form-grid">
+      <div class="form-group">
+        <label for="naziv">Naziv *</label>
+        <input 
+          type="text" 
+          id="naziv"
+          [(ngModel)]="noviUgostitelj.naziv" 
+          name="naziv" 
+          required
+          #naziv="ngModel"
+          placeholder="Unesite naziv ugostitelja">
+        <div *ngIf="naziv.invalid && naziv.touched" class="error-text">
+          Naziv je obavezan
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="kontaktEmail">Kontakt email</label>
+        <input 
+          type="email" 
+          id="kontaktEmail"
+          [(ngModel)]="noviUgostitelj.kontaktEmail" 
+          name="kontaktEmail"
+          placeholder="email@primjer.com">
+      </div>
+
+      <div class="form-group">
+        <label for="kontaktTelefon">Kontakt telefon</label>
+        <input 
+          type="text" 
+          id="kontaktTelefon"
+          [(ngModel)]="noviUgostitelj.kontaktTelefon" 
+          name="kontaktTelefon"
+          placeholder="+385 91 234 5678">
+      </div>
+
+      <div class="form-group">
+        <label for="oib">OIB</label>
+        <input 
+          type="text" 
+          id="oib"
+          [(ngModel)]="noviUgostitelj.oib" 
+          name="oib"
+          maxlength="11"
+          placeholder="12345678901">
+      </div>
+
+      <div class="form-group">
+        <label for="logotip">Logotip (URL)</label>
+        <input 
+          type="url" 
+          id="logotip"
+          [(ngModel)]="noviUgostitelj.logotip" 
+          name="logotip"
+          placeholder="https://primjer.com/logo.png">
+      </div>
+
+      <div class="form-group">
+        <label for="brandingBoje">Branding boje</label>
+        <input 
+          type="text" 
+          id="brandingBoje"
+          [(ngModel)]="noviUgostitelj.brandingBoje" 
+          name="brandingBoje"
+          placeholder="#3498db,#2ecc71">
+      </div>
+
+      <div class="form-group">
+        <label for="korisnik">Povezani korisnik *</label>
+        <select 
+          id="korisnik"
+          [(ngModel)]="noviUgostitelj.korisnikId" 
+          name="korisnik" 
+          required>
+          <option value="0" disabled selected>Odaberite korisnika</option>
+          <option *ngFor="let k of korisnici" [value]="k.id">
+            {{ k.imePrezime }} ({{ k.email }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-actions full-width">
+        <button type="submit" class="btn-primary" [disabled]="forma.invalid || loading">
+          <span *ngIf="loading">⏳ Dodavanje...</span>
+          <span *ngIf="!loading">✅ Dodaj ugostitelja</span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="prikaziFormu = false; resetFormu()">
+          ✕ Odustani
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && !ugostitelji.length" class="loading-state">
+    <div class="spinner"></div>
+    <p>Učitavanje ugostitelja...</p>
+  </div>
+
+  <!-- Tablica ugostitelja -->
+  <div class="card" *ngIf="!loading || ugostitelji.length">
+    <div class="table-responsive">
+      <table class="ugostitelji-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Naziv</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>OIB</th>
+            <th>Korisnik</th>
+            <th>Akcije</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Edit red -->
+          <tr *ngIf="editUgostitelj" class="edit-row">
+            <td>{{ editUgostitelj.id }}</td>
+            <td><input type="text" [(ngModel)]="editData.naziv" class="edit-input"></td>
+            <td><input type="email" [(ngModel)]="editData.kontaktEmail" class="edit-input"></td>
+            <td><input type="text" [(ngModel)]="editData.kontaktTelefon" class="edit-input"></td>
+            <td><input type="text" [(ngModel)]="editData.oib" class="edit-input" maxlength="11"></td>
+            <td>
+              <select [(ngModel)]="editData.korisnikId" class="edit-select">
+                <option *ngFor="let k of korisnici" [value]="k.id">
+                  {{ k.imePrezime }}
+                </option>
+              </select>
+            </td>
+            <td>
+              <button class="btn-save" (click)="spremiIzmjene()" [disabled]="loading">💾 Spremi</button>
+              <button class="btn-cancel" (click)="cancelEdit()">✕ Odustani</button>
+            </td>
+          </tr>
+
+          <!-- Redovi ugostitelja -->
+          <tr *ngFor="let ugostitelj of filtriraniUgostitelji">
+            <td><span class="id-badge">#{{ ugostitelj.id }}</span></td>
+            <td>{{ ugostitelj.naziv }}</td>
+            <td>{{ ugostitelj.kontaktEmail || '-' }}</td>
+            <td>{{ ugostitelj.kontaktTelefon || '-' }}</td>
+            <td>{{ ugostitelj.oib || '-' }}</td>
+            <td>{{ getKorisnikIme(ugostitelj) }}</td>
+            <td>
+              <button class="btn-icon btn-edit" (click)="urediUgostitelja(ugostitelj)" title="Uredi">✎</button>
+              <button class="btn-icon btn-delete" (click)="obrisiUgostitelja(ugostitelj.id)" title="Obriši">🗑️</button>
+            </td>
+          </tr>
+
+          <!-- Nema rezultata -->
+          <tr *ngIf="filtriraniUgostitelji.length === 0">
+            <td colspan="7" class="no-results">Nema pronađenih ugostitelja</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
