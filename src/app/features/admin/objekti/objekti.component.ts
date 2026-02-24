@@ -56,8 +56,7 @@ export class ObjektiComponent implements OnInit {
   this.loading = true;
   this.objektiService.getSviObjekti().subscribe({
     next: (data) => {
-      console.log('Prvi objekt iz backend:', data[0]);
-      console.log('Ima li qrKodBase64?', !!data[0]?.qrKodBase64);
+    
       this.objekti = data;
       this.loading = false;
     },
@@ -242,6 +241,7 @@ getImePutnika(id: number): string {
   }
   
   const qrUrl = `data:image/png;base64,${objekt.qrKodBase64}`;
+  const linkUrl = `http://localhost:4200/cjenik/${objekt.qrKod}`; // Link za cjenik
   
   const noviTab = window.open();
   if (noviTab) {
@@ -293,6 +293,27 @@ getImePutnika(id: number): string {
             word-break: break-all;
             color: #333;
             border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+          }
+          .link {
+            margin-top: 20px;
+          }
+          .link a {
+            background: #4a47a3;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(74, 71, 163, 0.3);
+          }
+          .link a:hover {
+            background: #3a3780;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(74, 71, 163, 0.4);
           }
         </style>
       </head>
@@ -301,6 +322,9 @@ getImePutnika(id: number): string {
           <h2>${objekt.naziv}</h2>
           <img src="${qrUrl}" alt="QR kod">
           <div class="qr-code">${objekt.qrKod}</div>
+          <div class="link">
+            <a href="${linkUrl}" target="_blank">🔗 Otvori cjenik</a>
+          </div>
         </div>
       </body>
       </html>
