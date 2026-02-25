@@ -15,5 +15,17 @@ export interface Artikl {
   brand: string;
   zakljucan: boolean;
   kategorijaId: number;
-  kategorijaNaziv?: string; // Za prikaz
+  kategorijaNaziv?: string; 
+}
+
+export interface CreateKategorijaDTO {
+  naziv: string;
+  redoslijedPrikaza: number;
+  aktivan: boolean;
+}
+
+export interface UpdateKategorijaDTO {
+  naziv?: string;
+  redoslijedPrikaza?: number;
+  aktivan?: boolean;
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { UpdateKategorijaDTO } from '../models/kategorija.model';
 
 export interface Kategorija {
   id: number;
@@ -34,11 +35,12 @@ export class KategorijeService {
   }
 
   // PUT /api/kategorije/{id}
-  updateKategorija(id: number, kategorija: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/kategorije/${id}`, kategorija, {
-      responseType: 'text'
-    });
-  }
+  updateKategorija(id: number, kategorija: UpdateKategorijaDTO): Observable<any> {
+  return this.http.put(`${this.apiUrl}/kategorije/${id}`, 
+    { id, ...kategorija },  // ← Spoji ID i ostala polja
+    { responseType: 'text' }
+  );
+}
 
   // DELETE /api/kategorije/{id}
   deleteKategorija(id: number): Observable<any> {

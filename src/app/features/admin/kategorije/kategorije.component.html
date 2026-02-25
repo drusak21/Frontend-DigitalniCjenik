@@ -1,0 +1,164 @@
+<div class="kategorije-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>Upravljanje kategorijama</h2>
+      <p *ngIf="kategorije.length">Ukupno kategorija: {{ kategorije.length }}</p>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="🔍 Pretraži kategorije..."
+          class="search-input">
+      </div>
+      <button class="btn-primary" (click)="prikaziFormu = !prikaziFormu">
+        {{ prikaziFormu ? '✕ Zatvori' : '+ Dodaj kategoriju' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Notifikacije -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✅ {{ successMessage }}
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Forma za dodavanje -->
+  <div class="card" *ngIf="prikaziFormu">
+    <h3>
+      <span class="card-icon">📑</span>
+      Dodaj novu kategoriju
+    </h3>
+    
+    <form (ngSubmit)="dodajKategoriju()" #forma="ngForm" class="form-grid">
+      <div class="form-group">
+        <label for="naziv">Naziv kategorije *</label>
+        <input 
+          type="text" 
+          id="naziv"
+          [(ngModel)]="novaKategorija.naziv" 
+          name="naziv" 
+          required
+          #naziv="ngModel"
+          placeholder="Unesite naziv kategorije">
+        <div *ngIf="naziv.invalid && naziv.touched" class="error-text">
+          Naziv je obavezan
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="redoslijed">Redoslijed prikaza</label>
+        <input 
+          type="number" 
+          id="redoslijed"
+          [(ngModel)]="novaKategorija.redoslijedPrikaza" 
+          name="redoslijed" 
+          min="1"
+          class="redoslijed-input">
+      </div>
+
+      <div class="form-group full-width checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="novaKategorija.aktivan" name="aktivan">
+          Aktivna kategorija
+        </label>
+      </div>
+
+      <div class="form-actions full-width">
+        <button type="submit" class="btn-primary" [disabled]="forma.invalid || loading">
+          <span *ngIf="loading">⏳ Dodavanje...</span>
+          <span *ngIf="!loading">✅ Dodaj kategoriju</span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="prikaziFormu = false; resetFormu()">
+          ✕ Odustani
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && !kategorije.length" class="loading-state">
+    <div class="spinner"></div>
+    <p>Učitavanje kategorija...</p>
+  </div>
+
+  <!-- Tablica kategorija -->
+  <div class="card" *ngIf="!loading || kategorije.length">
+    <div class="table-responsive">
+      <table class="kategorije-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Naziv</th>
+            <th>Redoslijed</th>
+            <th>Status</th>
+            <th>Poredak</th>
+            <th>Akcije</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Edit red -->
+          <tr *ngIf="editKategorija" class="edit-row">
+            <td>{{ editKategorija.id }}</td>
+            <td>
+              <input type="text" [(ngModel)]="editData.naziv" class="edit-input">
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="editData.redoslijedPrikaza" class="edit-input redoslijed-input" min="1">
+            </td>
+            <td>
+              <select [(ngModel)]="editData.aktivan" class="edit-select">
+                <option [value]="true">Aktivna</option>
+                <option [value]="false">Neaktivna</option>
+              </select>
+            </td>
+            <td>
+              <div class="poredak-buttons">
+                <button class="btn-icon btn-move" (click)="pomakniGore(kategorije.indexOf(editKategorija))" [disabled]="kategorije.indexOf(editKategorija) === 0">↑</button>
+                <button class="btn-icon btn-move" (click)="pomakniDolje(kategorije.indexOf(editKategorija))" [disabled]="kategorije.indexOf(editKategorija) === kategorije.length - 1">↓</button>
+              </div>
+            </td>
+            <td>
+              <button class="btn-save" (click)="spremiIzmjene()" [disabled]="loading">💾 Spremi</button>
+              <button class="btn-cancel" (click)="cancelEdit()">✕ Odustani</button>
+            </td>
+          </tr>
+
+          <!-- Redovi kategorija -->
+          <tr *ngFor="let kategorija of filtriraneKategorije; let i = index">
+            <td><span class="id-badge">#{{ kategorija.id }}</span></td>
+            <td>{{ kategorija.naziv }}</td>
+            <td>{{ kategorija.redoslijedPrikaza }}</td>
+            <td>
+              <span class="status-badge" [class.status-active]="kategorija.aktivan">
+                {{ kategorija.aktivan ? 'Aktivna' : 'Neaktivna' }}
+              </span>
+            </td>
+            <td>
+              <div class="poredak-buttons">
+                <button class="btn-icon btn-move" (click)="pomakniGore(i)" [disabled]="i === 0">↑</button>
+                <button class="btn-icon btn-move" (click)="pomakniDolje(i)" [disabled]="i === kategorije.length - 1">↓</button>
+              </div>
+            </td>
+            <td>
+              <button class="btn-icon btn-edit" (click)="urediKategoriju(kategorija)" title="Uredi">✎</button>
+              <button class="btn-icon btn-delete" (click)="obrisiKategoriju(kategorija.id)" title="Obriši">🗑️</button>
+            </td>
+          </tr>
+
+          <!-- Nema rezultata -->
+          <tr *ngIf="filtriraneKategorije.length === 0">
+            <td colspan="6" class="no-results">
+              Nema pronađenih kategorija
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

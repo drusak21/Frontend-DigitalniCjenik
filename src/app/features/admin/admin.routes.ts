@@ -39,6 +39,13 @@ export const ADMIN_ROUTES: Routes = [
         data: { uloge: ['Administrator'] }
       },
       {
+        path: 'kategorije',
+        loadComponent: () => 
+          import('./kategorije/kategorije.component').then(m => m.KategorijeComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { uloge: ['Administrator'] }
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'korisnici'
