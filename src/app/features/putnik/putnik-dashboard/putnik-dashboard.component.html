@@ -3,9 +3,64 @@
   <div class="header">
     <div class="header-left">
       <h2>Putnik Dashboard</h2>
-      <p *ngIf="objekti.length">Pregled objekata koje nadzirete</p>
+      <p *ngIf="objekti.length">Pregled vaših objekata i zahtjeva za potvrdu</p>
     </div>
-    <div class="header-right">
+  </div>
+
+  <!-- Notifikacije -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✅ {{ successMessage }}
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Tabovi -->
+  <div class="tabovi">
+    <button class="tab-btn" [class.active]="aktivniTab === 'objekti'" (click)="promijeniTab('objekti')">
+      🏢 Objekti ({{ objekti.length }})
+    </button>
+    <button class="tab-btn" [class.active]="aktivniTab === 'zahtjevi'" (click)="promijeniTab('zahtjevi')">
+      📋 Za potvrdu ({{ zahtjevi.length }})
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Učitavanje...</p>
+  </div>
+
+  <!-- ========== TAB OBJEKTI ========== -->
+  <div *ngIf="aktivniTab === 'objekti' && !prikaziPregled">
+    <!-- Statistika -->
+    <div class="stats-grid" *ngIf="objekti.length">
+      <div class="stat-card">
+        <div class="stat-icon">🏢</div>
+        <div class="stat-info">
+          <span class="stat-value">{{ ukupnoObjekata }}</span>
+          <span class="stat-label">Ukupno objekata</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <span class="stat-value">{{ aktivnihObjekata }}</span>
+          <span class="stat-label">Aktivnih</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏸️</div>
+        <div class="stat-info">
+          <span class="stat-value">{{ neaktivnihObjekata }}</span>
+          <span class="stat-label">Neaktivnih</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-section">
       <div class="search-box">
         <input 
           type="text" 
@@ -14,88 +69,129 @@
           class="search-input">
       </div>
     </div>
-  </div>
 
-  <!-- Statistika -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">🏢</div>
-      <div class="stat-info">
-        <span class="stat-value">{{ ukupnoObjekata }}</span>
-        <span class="stat-label">Ukupno objekata</span>
+    <!-- Tablica objekata -->
+    <div class="card" *ngIf="objekti.length > 0">
+      <h3>
+        <span class="card-icon">📋</span>
+        Objekti pod vašim nadzorom
+      </h3>
+      <div class="table-responsive">
+        <table class="objekti-table">
+          <thead>
+            <tr>
+              <th>Naziv</th>
+              <th>Adresa</th>
+              <th>Ugostitelj</th>
+              <th>QR kod</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let objekt of filtriraniObjekti">
+              <td>{{ objekt.naziv }}</td>
+              <td>{{ objekt.adresa }}</td>
+              <td>{{ objekt.ugostiteljNaziv || 'Nepoznato' }}</td>
+              <td>
+                <button class="btn-icon btn-qr" 
+                        (click)="otvoriQRPreview(objekt)" 
+                        [title]="'Prikaži QR kod: ' + objekt.qrKod">
+                  🖼️
+                </button>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(objekt.aktivnost)">
+                  {{ getStatusText(objekt.aktivnost) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon">✅</div>
-      <div class="stat-info">
-        <span class="stat-value">{{ aktivnihObjekata }}</span>
-        <span class="stat-label">Aktivnih</span>
+
+    <!-- Nema objekata -->
+    <div class="empty-state" *ngIf="!loading && objekti.length === 0">
+      <div class="empty-icon">🏢</div>
+      <h3>Nema dodijeljenih objekata</h3>
+      <p>Trenutno nemate objekata za nadzor.</p>
+    </div>
+  </div>
+
+  <!-- ========== TAB ZAHTJEVI ========== -->
+  <div *ngIf="aktivniTab === 'zahtjevi' && !prikaziPregled">
+    <!-- Lista zahtjeva -->
+    <div class="card" *ngIf="zahtjevi.length > 0">
+      <h3>
+        <span class="card-icon">📋</span>
+        Cjenici koji čekaju potvrdu
+      </h3>
+
+      <div class="zahtjevi-grid">
+        <div *ngFor="let zahtjev of zahtjevi" class="zahtjev-card">
+          <div class="zahtjev-header">
+            <h4>{{ zahtjev.naziv }}</h4>
+            <span class="status-badge status-pending">na potvrdi</span>
+          </div>
+          
+          <div class="zahtjev-info">
+            <p><strong>Objekt:</strong> {{ zahtjev.objektNaziv || 'Nepoznato' }}</p>
+            <p><strong>Broj artikala:</strong> {{ zahtjev.artikli?.length || 0 }}</p>
+            <p><strong>Kreirano:</strong> {{ zahtjev.datumKreiranja | date:'dd.MM.yyyy.' }}</p>
+          </div>
+
+          <div class="zahtjev-akcije">
+            <button class="btn-pregled" (click)="pregledajCjenik(zahtjev)">👁️ Pregledaj</button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon">⏸️</div>
-      <div class="stat-info">
-        <span class="stat-value">{{ neaktivnihObjekata }}</span>
-        <span class="stat-label">Neaktivnih</span>
+
+    <!-- Nema zahtjeva -->
+    <div class="empty-state" *ngIf="!loading && zahtjevi.length === 0">
+      <div class="empty-icon">📭</div>
+      <h3>Nema zahtjeva za potvrdu</h3>
+      <p>Trenutno nemate cjenika koji čekaju potvrdu.</p>
+    </div>
+  </div>
+
+  <!-- ========== PREGLED CJENIKA ========== -->
+  <div class="card" *ngIf="prikaziPregled && odabraniCjenik">
+    <div class="pregled-header">
+      <h3>
+        <span class="card-icon">👁️</span>
+        Pregled cjenika: {{ odabraniCjenik.naziv }}
+      </h3>
+      <button class="btn-secondary" (click)="zatvoriPregled()">← Nazad</button>
+    </div>
+
+    <div class="pregled-info">
+      <p><strong>Objekt:</strong> {{ odabraniCjenik.objektNaziv || 'Nepoznato' }}</p>
+      <p><strong>Status:</strong> <span class="status-badge status-pending">na potvrdi</span></p>
+      <p><strong>Kreirano:</strong> {{ odabraniCjenik.datumKreiranja | date:'dd.MM.yyyy. HH:mm' }}</p>
+    </div>
+
+    <!-- Artikli u cjeniku -->
+    <h4>Artikli u cjeniku ({{ artikliUCjeniku.length }})</h4>
+    
+    <div class="artikli-grid">
+      <div *ngFor="let artikl of artikliUCjeniku" class="artikl-card" [class.locked]="jeZakljucan(artikl)">
+        <div class="artikl-naziv">{{ artikl.naziv }}</div>
+        <div class="artikl-kategorija">{{ getNazivKategorije(artikl.kategorijaID) }}</div>
+        <div class="artikl-cijena">{{ artikl.cijena | number:'1.2-2' }} €</div>
+        <div class="artikl-brand">{{ artikl.brand }}</div>
+        <div *ngIf="jeZakljucan(artikl)" class="locked-badge">🔒 Panonski Izvori</div>
       </div>
     </div>
-  </div>
 
-  <!-- Notifikacije -->
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    ❌ {{ errorMessage }}
-  </div>
-
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading-state">
-    <div class="spinner"></div>
-    <p>Učitavanje objekata...</p>
-  </div>
-
-  <!-- Tablica objekata -->
-  <div class="card" *ngIf="!loading && objekti.length > 0">
-    <h3>
-      <span class="card-icon">📋</span>
-      Objekti pod vašim nadzorom
-    </h3>
-    <div class="table-responsive">
-      <table class="objekti-table">
-        <thead>
-          <tr>
-            <th>Naziv</th>
-            <th>Adresa</th>
-            <th>Ugostitelj</th>
-            <th>QR kod</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let objekt of filtriraniObjekti">
-            <td>{{ objekt.naziv }}</td>
-            <td>{{ objekt.adresa }}</td>
-            <td>{{ objekt.ugostiteljNaziv || 'Nepoznato' }}</td>
-            <td>
-              <button class="btn-icon btn-qr" 
-                      (click)="otvoriQRPreview(objekt)" 
-                      [title]="'Prikaži QR kod: ' + objekt.qrKod">
-                🖼️
-              </button>
-            </td>
-            <td>
-              <span class="status-badge" [class]="getStatusClass(objekt.aktivnost)">
-                {{ getStatusText(objekt.aktivnost) }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div *ngIf="artikliUCjeniku.length === 0" class="no-results">
+      Nema artikala u ovom cjeniku
     </div>
-  </div>
 
-  <!-- Nema objekata -->
-  <div class="empty-state" *ngIf="!loading && objekti.length === 0">
-    <div class="empty-icon">🏢</div>
-    <h3>Nema dodijeljenih objekata</h3>
-    <p>Trenutno nemate objekata za nadzor.</p>
+    <!-- Akcije -->
+    <div class="pregled-akcije">
+      <button class="btn-potvrdi" (click)="potvrdiCjenik(odabraniCjenik.id)">✅ Potvrdi cjenik</button>
+      <button class="btn-odbij" (click)="odbijCjenik(odabraniCjenik.id)">❌ Odbij cjenik</button>
+    </div>
   </div>
 </div>
