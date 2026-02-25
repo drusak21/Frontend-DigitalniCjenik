@@ -36,6 +36,11 @@ export const routes: Routes = [
   canActivate: [authGuard]
   },
   {
+  path: 'ugostitelj',
+  loadChildren: () => import('./features/ugostitelj/ugostitelj.routes').then(m => m.UGOSTITELJ_ROUTES),
+  canActivate: [authGuard]
+  },
+  {
     path: '**',
     loadComponent: () => 
       import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent)

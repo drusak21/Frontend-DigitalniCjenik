@@ -26,4 +26,29 @@ export class CjeniciService {
       })
     );
   }
+
+  updateCjenik(id: number, cjenik: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/cjenici/${id}`, cjenik, {
+      responseType: 'text'
+    });
+  }
+
+  createCjenik(cjenik: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/cjenici`, cjenik, {
+      responseType: 'text'
+    });
+  }
+
+  posaljiNaPotvrdu(id: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/cjenici/${id}/posalji`, {}, {
+      responseType: 'text'
+    });
+  }
+
+  // POST /api/cjenici/{id}/potvrdi - potvrdi cjenik
+  potvrdiCjenik(id: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/cjenici/${id}/potvrdi`, {}, {
+      responseType: 'text'
+    });
+  }
 }

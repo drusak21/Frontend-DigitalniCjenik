@@ -1,0 +1,235 @@
+<div class="ugostitelj-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>Ugostitelj Dashboard</h2>
+      <p *ngIf="mojiObjekti.length">Upravljanje vašim objektima i artiklima</p>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="🔍 Pretraži artikle..."
+          class="search-input">
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifikacije -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✅ {{ successMessage }}
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Učitavanje...</p>
+  </div>
+
+  <!-- Moji objekti -->
+  <div class="card" *ngIf="mojiObjekti.length > 0">
+    <h3>
+      <span class="card-icon">🏢</span>
+      Moji objekti
+    </h3>
+    
+    <div class="objekti-grid">
+      <div *ngFor="let objekt of mojiObjekti" 
+           class="objekt-card"
+           [class.selected]="selectedObjektId === objekt.id"
+           (click)="promijeniObjekt(objekt.id)">
+        <div class="objekt-naziv">{{ objekt.naziv }}</div>
+        <div class="objekt-adresa">{{ objekt.adresa }}</div>
+        <div class="objekt-status" [class.active]="objekt.aktivnost">
+          {{ objekt.aktivnost ? 'Aktivan' : 'Neaktivan' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ako nema objekata -->
+  <div class="empty-state" *ngIf="!loading && mojiObjekti.length === 0">
+    <div class="empty-icon">🏢</div>
+    <h3>Nemate dodijeljenih objekata</h3>
+    <p>Kontaktirajte administratora za dodjelu objekata.</p>
+  </div>
+
+  <!-- Odabrani objekt detalji -->
+  <div class="card" *ngIf="selectedObjekt">
+    <h3>
+      <span class="card-icon">📋</span>
+      {{ selectedObjekt.naziv }} - Cjenik
+    </h3>
+
+    <!-- Status cjenika -->
+    <div class="cjenik-status" *ngIf="trenutniCjenik">
+      Status cjenika: 
+      <span class="status-badge" [ngClass]="{
+        'status-active': trenutniCjenik?.status === 'aktivan',
+        'status-preparation': trenutniCjenik?.status === 'u pripremi',
+        'status-pending': trenutniCjenik?.status === 'na potvrdi',
+        'status-archived': trenutniCjenik?.status === 'arhiviran'
+      }">
+        {{ trenutniCjenik?.status }}
+      </span>
+    </div>
+
+    <!-- Ako je cjenik aktivan - prikaži info poruku i samo pregled -->
+    <div class="info-message" *ngIf="trenutniCjenik?.status === 'aktivan'">
+      <p>🔍 Ovaj cjenik je aktivan i prikazuje se gostima. Za uređivanje kreirajte novu verziju.</p>
+    </div>
+
+    <!-- Gumb za kreiranje nove verzije - SAMO ako je trenutni cjenik aktivan -->
+    <div class="action-buttons" *ngIf="trenutniCjenik?.status === 'aktivan'">
+      <button class="btn-secondary" (click)="kreirajNovuVerzijuCjenika()">
+        📋 Kreiraj novu verziju
+      </button>
+    </div>
+
+    <!-- Filter po kategoriji i gumbi - SAMO za cjenike u pripremi -->
+    <div class="filter-bar" *ngIf="trenutniCjenik?.status === 'u pripremi'">
+      <select [(ngModel)]="filterKategorija" class="filter-select">
+        <option value="0">Sve kategorije</option>
+        <option *ngFor="let kat of kategorije" [value]="kat.id">
+          {{ kat.naziv }}
+        </option>
+      </select>
+      
+      <div class="action-buttons">
+        <button class="btn-primary" (click)="prikaziNoviFormu = !prikaziNoviFormu">
+          {{ prikaziNoviFormu ? '✕ Zatvori' : '+ Dodaj artikl' }}
+        </button>
+        
+        <!-- Gumb za slanje na potvrdu - samo ako je cjenik u pripremi -->
+        <button class="btn-success" (click)="posaljiNaPotvrdu()">
+          📤 Pošalji na potvrdu
+        </button>
+      </div>
+    </div>
+
+    <!-- Forma za dodavanje novog artikla - SAMO za cjenike u pripremi -->
+    <div class="nova-forma" *ngIf="prikaziNoviFormu && trenutniCjenik?.status === 'u pripremi'">
+      <h4>Dodaj novi artikl</h4>
+      <form (ngSubmit)="dodajArtikl()" #forma="ngForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Naziv *</label>
+            <input type="text" [(ngModel)]="noviArtikl.naziv" name="naziv" required>
+          </div>
+          <div class="form-group">
+            <label>Kategorija *</label>
+            <select [(ngModel)]="noviArtikl.kategorijaID" name="kategorija" required>
+              <option value="0" disabled>Odaberite kategoriju</option>
+              <option *ngFor="let kat of kategorije" [value]="kat.id">
+                {{ kat.naziv }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Cijena (€) *</label>
+            <input type="number" step="0.01" [(ngModel)]="noviArtikl.cijena" name="cijena" required>
+          </div>
+          <div class="form-group">
+            <label>Brand</label>
+            <input type="text" [(ngModel)]="noviArtikl.brand" name="brand">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Opis</label>
+          <textarea [(ngModel)]="noviArtikl.opis" name="opis" rows="2"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Sastav / Alergeni</label>
+          <input type="text" [(ngModel)]="noviArtikl.sastavAlergeni" name="sastav">
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="forma.invalid || loading">✅ Dodaj</button>
+          <button type="button" class="btn-secondary" (click)="prikaziNoviFormu = false">✕ Odustani</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Zaključani artikli (Panonski Izvori) - uvijek se prikazuju, bez akcija -->
+    <div class="artikli-section" *ngIf="zakljucaniArtikli.length > 0">
+      <h4>🔒 Panonski Izvori (samo za pregled)</h4>
+      <div class="artikli-grid">
+        <div *ngFor="let artikl of zakljucaniArtikli" class="artikl-card locked">
+          <div class="artikl-naziv">{{ artikl.naziv }}</div>
+          <div class="artikl-kategorija">{{ getNazivKategorije(artikl.kategorijaID) }}</div>
+          <div class="artikl-cijena">{{ artikl.cijena ? (artikl.cijena | number:'1.2-2') : '0.00' }} €</div>
+          <div class="artikl-brand">{{ artikl.brand }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="artikli-section">
+      <h4>📝 Vaši artikli</h4>
+
+      <div class="artikli-grid">
+        <div *ngFor="let artikl of filtriraniSlobodniArtikli" class="artikl-card">
+          <div class="artikl-naziv">{{ artikl.naziv }}</div>
+          <div class="artikl-kategorija">{{ getNazivKategorije(artikl.kategorijaID) }}</div>
+          <div class="artikl-cijena">{{ artikl.cijena ? (artikl.cijena | number:'1.2-2') : '0.00' }} €</div>
+          <div class="artikl-brand">{{ artikl.brand }}</div>
+          
+          <div class="artikl-akcije" *ngIf="trenutniCjenik?.status === 'u pripremi'">
+            <button class="btn-icon btn-edit" (click)="urediArtikl(artikl)" title="Uredi artikl">✎</button>
+            <button class="btn-icon btn-delete" (click)="ukloniArtiklIzCjenika(artikl)" title="Ukloni iz cjenika">🗑️</button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="filtriraniSlobodniArtikli.length === 0" class="no-results">
+        Nema pronađenih artikala
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit artikl modal -->
+<div class="modal-overlay" *ngIf="editArtiklModal" (click)="zatvoriEditModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Uredi artikl - {{ editArtiklData?.naziv }}</h3>
+      <button class="modal-close" (click)="zatvoriEditModal()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Naziv</label>
+        <input type="text" [(ngModel)]="editArtiklData.naziv" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label>Opis</label>
+        <textarea [(ngModel)]="editArtiklData.opis" class="form-control" rows="3"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Brand</label>
+        <input type="text" [(ngModel)]="editArtiklData.brand" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label>Cijena (€)</label>
+        <input type="number" step="0.01" [(ngModel)]="editArtiklData.cijena" class="form-control">
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-save" (click)="spremiEditArtikla()">💾 Spremi</button>
+      <button class="btn-cancel" (click)="zatvoriEditModal()">Odustani</button>
+    </div>
+  </div>
+</div>
