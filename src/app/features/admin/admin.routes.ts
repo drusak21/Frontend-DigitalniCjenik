@@ -30,7 +30,14 @@ export const ADMIN_ROUTES: Routes = [
         import('./ugostitelji/ugostitelji.component').then(m => m.UgostiteljiComponent),
       canActivate: [authGuard, roleGuard],
       data: { uloge: ['Administrator'] }
-      } ,
+      },
+      {
+        path: 'artikli',
+        loadComponent: () => 
+          import('./artikli/artikli.component').then(m => m.ArtikliComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { uloge: ['Administrator'] }
+      },
       {
         path: '',
         pathMatch: 'full',

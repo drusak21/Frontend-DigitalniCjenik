@@ -3,10 +3,31 @@ export interface Artikl {
   naziv: string;
   opis: string;
   cijena: number;
-  sastav: string;
-  alergeni: string[];
+  sastavAlergeni: string;
   slika: string;
-  brand: 'PanonskiIzvori' | 'Ostalo';
+  brand: string;
   zakljucan: boolean; 
-  kategorijaId: number;
+  kategorijaID: number;
+}
+
+export interface CreateArtiklDTO {
+  naziv: string;
+  opis?: string;
+  cijena: number;
+  sastavAlergeni?: string;
+  slika?: string;
+  brand: string;
+  zakljucan: boolean;
+  kategorijaID: number;
+}
+
+export interface UpdateArtiklDTO {
+  naziv?: string;
+  opis?: string;
+  cijena?: number;
+  sastavAlergeni?: string;
+  slika?: string;
+  brand?: string;
+  zakljucan?: boolean;
+  kategorijaID?: number;
 }
