@@ -8,6 +8,8 @@ import { CjeniciService } from '../../../core/services/cjenici.service';
 import { Objekt } from '../../../core/models/objekt.model';
 import { Artikl } from '../../../core/models/artikl.model';
 import { Kategorija } from '../../../core/models/kategorija.model';
+import { Banner } from '../../../core/models/banner.model';
+import { BanneriService } from '../../../core/services/banneri.service';
 
 @Component({
   selector: 'app-ugostitelj-dashboard',
@@ -23,6 +25,7 @@ export class UgostiteljDashboardComponent implements OnInit {
   kategorije: Kategorija[] = [];
   artikliUCjeniku: Artikl[] = [];
   trenutniCjenik: any = null;
+  banneri: Banner[] = [];
 
   editArtiklModal: boolean = false;
   editArtiklData: any = {
@@ -65,7 +68,8 @@ export class UgostiteljDashboardComponent implements OnInit {
     private objektiService: ObjektiService,
     private artikliService: ArtikliService,
     private kategorijeService: KategorijeService,
-    private cjeniciService: CjeniciService
+    private cjeniciService: CjeniciService,
+    private banneriService: BanneriService
   ) {}
 
   ngOnInit(): void {
@@ -113,15 +117,6 @@ export class UgostiteljDashboardComponent implements OnInit {
         console.error('Greška pri učitavanju artikala:', error);
       }
     });
-  }
-
-  promijeniObjekt(id: number): void {
-    this.selectedObjektId = id;
-    this.selectedObjekt = this.mojiObjekti.find(o => o.id === id) || null;
-    
-    if (this.selectedObjekt) {
-      this.ucitajCjenikZaObjekt(this.selectedObjekt.id);
-    }
   }
 
  ucitajCjenikZaObjekt(objektId: number): void {
@@ -586,6 +581,43 @@ ukloniArtiklIzCjenika(artikl: Artikl): void {
       console.error('Greška pri uklanjanju artikla:', error);
       this.errorMessage = 'Greška pri uklanjanju artikla';
       this.loading = false;
+    }
+  });
+}
+
+  ucitajBannereZaObjekt(objektId: number): void {
+  this.banneriService.getBanneriZaObjekt(objektId).subscribe({
+    next: (data) => {
+      this.banneri = data;
+    },
+    error: (error) => {
+      console.error('Greška pri učitavanju banner-a:', error);
+    }
+  });
+}
+
+promijeniObjekt(id: number): void {
+  this.selectedObjektId = id;
+  this.selectedObjekt = this.mojiObjekti.find(o => o.id === id) || null;
+  
+  if (this.selectedObjekt) {
+    this.ucitajCjenikZaObjekt(this.selectedObjekt.id);
+    this.ucitajBannereZaObjekt(this.selectedObjekt.id); 
+  }
+}
+
+toggleBannerAktivnost(banner: Banner): void {
+  const novaVrijednost = !banner.aktivan;
+  
+  this.banneriService.aktivirajBanner(banner.id, novaVrijednost).subscribe({
+    next: () => {
+      banner.aktivan = novaVrijednost;
+      this.successMessage = `Banner ${novaVrijednost ? 'aktivirana' : 'deaktivirana'}`;
+      setTimeout(() => this.successMessage = '', 3000);
+    },
+    error: (error) => {
+      console.error('Greška:', error);
+      this.errorMessage = 'Greška pri promjeni statusa';
     }
   });
 }

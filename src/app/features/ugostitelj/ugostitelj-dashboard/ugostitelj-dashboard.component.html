@@ -173,6 +173,7 @@
       </div>
     </div>
 
+    <!-- Slobodni artikli -->
     <div class="artikli-section">
       <h4>📝 Vaši artikli</h4>
 
@@ -183,6 +184,7 @@
           <div class="artikl-cijena">{{ artikl.cijena ? (artikl.cijena | number:'1.2-2') : '0.00' }} €</div>
           <div class="artikl-brand">{{ artikl.brand }}</div>
           
+          <!-- Akcije - SAMO za cjenike u pripremi -->
           <div class="artikl-akcije" *ngIf="trenutniCjenik?.status === 'u pripremi'">
             <button class="btn-icon btn-edit" (click)="urediArtikl(artikl)" title="Uredi artikl">✎</button>
             <button class="btn-icon btn-delete" (click)="ukloniArtiklIzCjenika(artikl)" title="Ukloni iz cjenika">🗑️</button>
@@ -190,11 +192,73 @@
         </div>
       </div>
 
+      <!-- Ako nema slobodnih artikala -->
       <div *ngIf="filtriraniSlobodniArtikli.length === 0" class="no-results">
         Nema pronađenih artikala
       </div>
     </div>
   </div>
+
+  <!-- ===== BANNERI SEKCIJA ===== -->
+  <!-- Banneri sekcija - SAMO za odabrani objekt -->
+  <div class="card" *ngIf="selectedObjekt && banneri.length > 0">
+    <h3>
+      <span class="card-icon">🖼️</span>
+      Banneri za objekt {{ selectedObjekt.naziv }}
+    </h3>
+
+    <div class="banneri-grid">
+      <div *ngFor="let banner of banneri" class="banner-card">
+        <div class="banner-header">
+          <span class="tip-badge" [ngClass]="{
+            'tip-homepage': banner.tip.toLowerCase() === 'homepage',
+            'tip-kategorija': banner.tip.toLowerCase() === 'kategorija',
+            'tip-popup': banner.tip.toLowerCase() === 'popup'
+          }">
+            {{ banner.tip }}
+          </span>
+          <span class="status-badge" [class.status-active]="banner.aktivan">
+            {{ banner.aktivan ? 'Aktivan' : 'Neaktivan' }}
+          </span>
+        </div>
+
+        <div class="banner-content">
+          <!-- Ako je slika u sadržaju -->
+          <div *ngIf="banner.sadrzaj?.includes('<img')" 
+               class="banner-preview" 
+               [innerHTML]="banner.sadrzaj">
+          </div>
+          
+          <!-- Ako je tekst -->
+          <div *ngIf="!banner.sadrzaj?.includes('<img')" class="banner-text">
+            {{ banner.sadrzaj }}
+          </div>
+
+          <!-- Povezana akcija (ako postoji) -->
+          <div *ngIf="banner.akcijaNaziv" class="banner-akcija">
+            🔗 Akcija: {{ banner.akcijaNaziv }}
+          </div>
+        </div>
+
+        <!-- Toggle za aktivaciju/deaktivaciju -->
+        <div class="banner-actions">
+          <button class="btn-toggle" 
+                  (click)="toggleBannerAktivnost(banner)"
+                  [class.btn-active]="banner.aktivan"
+                  [class.btn-inactive]="!banner.aktivan">
+            {{ banner.aktivan ? '🔴 Deaktiviraj' : '🟢 Aktiviraj' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ako nema banner-a -->
+  <div class="empty-banner" *ngIf="selectedObjekt && banneri.length === 0">
+    <p>Nema banner-a za ovaj objekt.</p>
+  </div>
+  <!-- ===== KRAJ BANNERI SEKCIJE ===== -->
+
 </div>
 
 <!-- Edit artikl modal -->
