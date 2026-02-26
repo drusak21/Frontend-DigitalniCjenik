@@ -1,0 +1,221 @@
+<div class="banneri-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>Upravljanje bannerima</h2>
+      <p *ngIf="banneri.length">Ukupno banner-a: {{ banneri.length }}</p>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          placeholder="🔍 Pretraži bannere..."
+          class="search-input">
+      </div>
+      
+      <select [(ngModel)]="filterTip" class="filter-select">
+        <option value="">Svi tipovi</option>
+        <option value="homepage">Homepage</option>
+        <option value="kategorija">Kategorija</option>
+        <option value="popup">Pop-up</option>
+      </select>
+      
+      <button class="btn-primary" (click)="prikaziFormu = !prikaziFormu">
+        {{ prikaziFormu ? '✕ Zatvori' : '+ Dodaj banner' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Notifikacije -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✅ {{ successMessage }}
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Forma za dodavanje -->
+  <div class="card" *ngIf="prikaziFormu">
+    <h3>
+      <span class="card-icon">🖼️</span>
+      Dodaj novi banner
+    </h3>
+    
+    <form (ngSubmit)="dodajBanner()" #forma="ngForm" class="form-grid">
+      <!-- Tip banner-a -->
+      <div class="form-group">
+        <label for="tip">Tip *</label>
+        <select 
+          id="tip"
+          [(ngModel)]="noviBanner.tip" 
+          name="tip" 
+          required>
+          <option value="homepage">Homepage</option>
+          <option value="kategorija">Kategorija</option>
+          <option value="popup">Pop-up</option>
+        </select>
+      </div>
+
+      <!-- Objekt -->
+      <div class="form-group">
+        <label for="objekt">Objekt *</label>
+        <select 
+          id="objekt"
+          [(ngModel)]="noviBanner.objektID" 
+          name="objekt" 
+          required>
+          <option value="0" disabled selected>Odaberite objekt</option>
+          <option *ngFor="let obj of objekti" [value]="obj.id">
+            {{ obj.naziv }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Akcija (opcionalno) -->
+      <div class="form-group">
+        <label for="akcija">Akcija (opcionalno)</label>
+        <select 
+          id="akcija"
+          [(ngModel)]="noviBanner.akcijaID" 
+          name="akcija">
+          <option [ngValue]="undefined">Bez akcije</option>
+          <option *ngFor="let a of akcije" [value]="a.id">
+            {{ a.naziv }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Sadržaj -->
+      <div class="form-group full-width">
+        <label for="sadrzaj">Sadržaj *</label>
+        <textarea 
+          id="sadrzaj"
+          [(ngModel)]="noviBanner.sadrzaj" 
+          name="sadrzaj"
+          required
+          rows="4"
+          placeholder="HTML kod ili tekst za banner"></textarea>
+        <small class="help-text">
+          Možete unijeti HTML kod (npr. &lt;img src="slika.jpg"&gt;) ili običan tekst
+        </small>
+      </div>
+
+      <div class="form-actions full-width">
+        <button type="submit" class="btn-primary" [disabled]="forma.invalid || loading">
+          <span *ngIf="loading">⏳ Dodavanje...</span>
+          <span *ngIf="!loading">✅ Dodaj banner</span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="prikaziFormu = false; resetFormu()">
+          ✕ Odustani
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && !banneri.length" class="loading-state">
+    <div class="spinner"></div>
+    <p>Učitavanje banner-a...</p>
+  </div>
+
+  <!-- Tablica banner-a -->
+  <div class="card" *ngIf="!loading || banneri.length">
+    <div class="table-responsive">
+      <table class="banneri-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tip</th>
+            <th>Sadržaj</th>
+            <th>Objekt</th>
+            <th>Akcija</th>
+            <th>Status</th>
+            <th>Akcije</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Edit red -->
+          <tr *ngIf="editBanner" class="edit-row">
+            <td>{{ editBanner.id }}</td>
+            <td>
+              <select [(ngModel)]="editData.tip" class="edit-select">
+                <option value="homepage">Homepage</option>
+                <option value="kategorija">Kategorija</option>
+                <option value="popup">Pop-up</option>
+              </select>
+            </td>
+            <td>
+              <textarea [(ngModel)]="editData.sadrzaj" class="edit-textarea" rows="2"></textarea>
+            </td>
+            <td>
+              <select [(ngModel)]="editData.objektID" class="edit-select">
+                <option *ngFor="let obj of objekti" [value]="obj.id">
+                  {{ obj.naziv }}
+                </option>
+              </select>
+            </td>
+            <td>
+              <select [(ngModel)]="editData.akcijaID" class="edit-select">
+                <option [ngValue]="undefined">Bez akcije</option>
+                <option *ngFor="let a of akcije" [value]="a.id">
+                  {{ a.naziv }}
+                </option>
+              </select>
+            </td>
+            <td>
+              <span class="status-badge" [class.status-active]="editBanner.aktivan">
+                {{ editBanner.aktivan ? 'Aktivan' : 'Neaktivan' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-save" (click)="spremiIzmjene()" [disabled]="loading">💾 Spremi</button>
+              <button class="btn-cancel" (click)="cancelEdit()">✕ Odustani</button>
+            </td>
+          </tr>
+
+          <!-- Redovi banner-a -->
+          <tr *ngFor="let banner of filtriraniBanneri">
+            <td><span class="id-badge">#{{ banner.id }}</span></td>
+            <td>
+              <span class="tip-badge" [ngClass]="{
+                'tip-homepage': banner.tip.toLowerCase() === 'homepage',
+                'tip-kategorija': banner.tip.toLowerCase() === 'kategorija',
+                'tip-popup': banner.tip.toLowerCase() === 'popup'
+              }">
+                {{ banner.tip }}
+              </span>
+            </td>
+            <td>
+              <div class="sadrzaj-preview" [innerHTML]="banner.sadrzaj"></div>
+              <small *ngIf="!banner.sadrzaj" class="empty-text">-</small>
+            </td>
+            <td>{{ getNazivObjekta(banner.objektID) }}</td>
+            <td>{{ getNazivAkcije(banner.akcijaID) }}</td>
+            <td>
+              <span class="status-badge" [class.status-active]="banner.aktivan">
+                {{ banner.aktivan ? 'Aktivan' : 'Neaktivan' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-icon btn-edit" (click)="urediBanner(banner)" title="Uredi">✎</button>
+              <button class="btn-icon btn-toggle" (click)="toggleAktivnost(banner)" 
+                      [title]="banner.aktivan ? 'Deaktiviraj' : 'Aktiviraj'">
+                {{ banner.aktivan ? '🔴' : '🟢' }}
+              </button>
+              <button class="btn-icon btn-delete" (click)="obrisiBanner(banner.id)" title="Obriši">🗑️</button>
+            </td>
+          </tr>
+
+          <!-- Nema rezultata -->
+          <tr *ngIf="filtriraniBanneri.length === 0">
+            <td colspan="7" class="no-results">
+              Nema pronađenih banner-a
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
