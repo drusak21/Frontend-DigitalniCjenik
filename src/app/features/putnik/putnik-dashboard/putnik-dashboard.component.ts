@@ -221,15 +221,27 @@ export class PutnikDashboardComponent implements OnInit {
     }
   }
 
-  odbijCjenik(id: number): void {
-    if (confirm('Jeste li sigurni da želite odbiti ovaj cjenik?')) {
-      // Za sada samo makni iz liste
-      this.zahtjevi = this.zahtjevi.filter(z => z.id !== id);
-      this.zatvoriPregled();
-      this.successMessage = 'Cjenik odbijen';
-      setTimeout(() => this.successMessage = '', 3000);
-    }
+odbijCjenik(id: number): void {
+  if (confirm('Jeste li sigurni da želite odbiti ovaj cjenik?')) {
+    this.loading = true;
+    
+    this.cjeniciService.odbijCjenik(id).subscribe({
+      next: (response) => {
+        console.log('Cjenik odbijen:', response);
+        this.successMessage = 'Cjenik odbijen i vraćen u pripremu';
+        this.ucitajZahtjeve(); // Ponovo učitaj zahtjeve
+        this.zatvoriPregled();
+        this.loading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (error) => {
+        console.error('Greška pri odbijanju:', error);
+        this.errorMessage = 'Greška pri odbijanju cjenika';
+        this.loading = false;
+      }
+    });
   }
+}
 
   // Postojeće metode
   get filtriraniObjekti(): Objekt[] {

@@ -51,4 +51,10 @@ export class CjeniciService {
       responseType: 'text'
     });
   }
+
+  odbijCjenik(id: number): Observable<any> {
+  return this.http.post(`${this.apiUrl}/cjenici/${id}/odbij`, {}, {
+    responseType: 'text'
+  });
+}
 }
