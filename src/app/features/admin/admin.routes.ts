@@ -45,6 +45,13 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [authGuard, roleGuard],
         data: { uloge: ['Administrator'] }
       },
+       {
+        path: 'akcije',
+        loadComponent: () => 
+          import('./akcije/akcije.component').then(m => m.AkcijeComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { uloge: ['Administrator'] }
+      },
       {
         path: '',
         pathMatch: 'full',

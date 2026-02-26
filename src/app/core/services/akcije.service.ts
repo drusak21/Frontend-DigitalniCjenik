@@ -47,9 +47,11 @@ export class AkcijeService {
   }
 
   // PATCH /api/akcije/{id}/aktiviraj
-  toggleAktivnost(id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/akcije/${id}/aktiviraj`, {}, {
-      responseType: 'text'
-    });
-  }
+  // PATCH /api/akcije/{id}/aktiviraj - šalje boolean
+    aktivirajAkciju(id: number, aktivna: boolean): Observable<any> {
+  return this.http.patch(`${this.apiUrl}/akcije/${id}/aktiviraj`, aktivna, {
+    headers: { 'Content-Type': 'application/json' },
+    responseType: 'text'
+  });
+}
 }
