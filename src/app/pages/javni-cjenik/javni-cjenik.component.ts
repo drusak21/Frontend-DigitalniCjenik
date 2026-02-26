@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CjeniciService } from '../../core/services/cjenici.service';
 import { ObjektiService } from '../../core/services/objekti.service';
 import { KategorijeService } from '../../core/services/kategorija.service';
-import { ArtiklUCjeniku } from '../../core/models/cjenik.model';
 import { ArtikliService } from '../../core/services/artikli.service';
-
+import { AkcijeService } from '../../core/services/akcije.service';
+import { ArtiklUCjeniku } from '../../core/models/cjenik.model';
+import { Banner } from '../../core/models/banner.model';
+import { BanneriService } from '../../core/services/banneri.service';
 
 interface KategorijaPrikaz {
   id: number;
@@ -33,6 +35,13 @@ export class JavniCjenikComponent implements OnInit {
   error: boolean = false;
   korisnikUloga: string = '';
   sviArtikliMap: Map<number, any> = new Map();
+  akcijeMap: Map<number, string> = new Map();
+  banneri: Banner[] = [];
+  homepageBanneri: Banner[] = [];
+  popupBanner: Banner | null = null;
+  popupZatvoren: boolean = false;
+  banneriPoKategoriji: Map<number, any[]> = new Map();
+
 
   // Mapa kategorija prema tvojoj bazi
   kategorijeMap: Map<number, string> = new Map([
@@ -45,13 +54,13 @@ export class JavniCjenikComponent implements OnInit {
   ]);
 
   kategorijePrijevodi: Map<number, string> = new Map([
-  [1, 'Non-alcoholic drinks'],
-  [2, 'Alcoholic drinks'],
-  [3, 'Food'],
-  [4, 'Panonski Izvori'],
-  [5, 'Desserts'],
-  [6, 'Hot drinks']
-]);
+    [1, 'Non-alcoholic drinks'],
+    [2, 'Alcoholic drinks'],
+    [3, 'Food'],
+    [4, 'Panonski Izvori'],
+    [5, 'Desserts'],
+    [6, 'Hot drinks']
+  ]);
 
   // Prijevodi
   translations: any = {
@@ -81,8 +90,11 @@ export class JavniCjenikComponent implements OnInit {
     private route: ActivatedRoute,
     private objektiService: ObjektiService,
     private cjeniciService: CjeniciService,
+    private artikliService: ArtikliService,
+    private akcijeService: AkcijeService,
     private authService: AuthService,
-    private artikliService: ArtikliService
+    private banneriService: BanneriService,
+     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -92,13 +104,116 @@ export class JavniCjenikComponent implements OnInit {
   }
 
   provjeriPrijavu() {
-  this.isLoggedIn = this.authService.isLoggedIn();
-  if (this.isLoggedIn) {
-    this.korisnikUloga = this.authService.getUserRole() || '';
+    this.isLoggedIn = this.authService.isLoggedIn();
+    if (this.isLoggedIn) {
+      this.korisnikUloga = this.authService.getUserRole() || '';
+    }
   }
+
+  kategorijaBanneri: any[] = [];
+
+// Metoda za provjeru pripada li banner kategoriji
+bannerPripadaKategoriji(banner: any, kategorijaId: number): boolean {
+  if (!banner || !banner.sadrzaj) return false;
+  
+  // Pokušaj pronaći ID kategorije u sadržaju
+  const pattern = new RegExp(`KATEGORIJA_ID[=:]${kategorijaId}(\\s|$|--)`);
+  return pattern.test(banner.sadrzaj);
 }
 
- ucitajPodatke() {
+ucitajBannereZaObjekt(objektId: number): void {
+  console.log('🔥 Učitavam banner-e za objekt:', objektId);
+  
+  this.banneriService.getBanneriZaObjekt(objektId).subscribe({
+    next: (banneri) => {
+      console.log('🔥 Svi banneri iz servisa:', banneri);
+      
+      // Filtriraj aktivne bannere
+      const aktivniBanneri = banneri.filter(b => b.aktivan);
+      console.log('🔥 Aktivni banneri:', aktivniBanneri);
+      
+      // Homepage banneri
+      this.homepageBanneri = aktivniBanneri.filter(b => 
+        b.tip?.toLowerCase() === 'homepage'
+      );
+      console.log('🔥 Homepage banneri:', this.homepageBanneri);
+      
+      // Pop-up banner
+      const popup = aktivniBanneri.find(b => b.tip?.toLowerCase() === 'popup');
+      this.popupBanner = popup || null;
+      console.log('🔥 Pop-up banner:', this.popupBanner);
+      
+      // Kategorija banneri
+      this.kategorijaBanneri = aktivniBanneri.filter(b => 
+        b.tip?.toLowerCase() === 'kategorija'
+      );
+      console.log('🔥 Kategorija banneri (prije obrade):', this.kategorijaBanneri);
+      
+      // Ispiši sadržaj prvog banner-a za provjeru
+      if (this.kategorijaBanneri.length > 0) {
+        console.log('🔥 Prvi banner sadržaj:', this.kategorijaBanneri[0].sadrzaj);
+        
+        // Testiraj regex na prvom banneru
+        const testBanner = this.kategorijaBanneri[0];
+        const testMatch = testBanner.sadrzaj?.match(/<!--\s*KATEGORIJA_ID=(\d+)\s*-->/);
+        console.log('🔥 Test regex na prvom banneru:', testMatch);
+      }
+      
+      // FORCIRAJ OSVJEŽAVANJE POMOĆU setTimeout
+      setTimeout(() => {
+        this.kategorijaBanneri = [...this.kategorijaBanneri];
+        console.log('🔥 Kategorija banneri nakon osvježavanja:', this.kategorijaBanneri.length);
+      }, 0);
+    },
+    error: (err) => {
+      console.error('🔥 Greška pri učitavanju banner-a:', err);
+      
+      // U slučaju greške, osiguraj da je niz prazan
+      this.kategorijaBanneri = [];
+      this.homepageBanneri = [];
+      this.popupBanner = null;
+    }
+  });
+}
+
+  ucitajAkcijeZaObjekt(objektId: number, callback?: () => void): void {
+  
+  this.akcijeService.getAkcijeZaObjekt(objektId).subscribe({
+    next: (akcije) => {
+
+
+      const aktivneAkcije = akcije.filter(a => a.aktivna);
+      
+      // Spremi u mapu: ID artikla -> opis akcije
+      this.akcijeMap.clear();
+      aktivneAkcije.forEach(akcija => {
+
+        const artiklId = akcija.artiklID;
+        
+        if (artiklId) {
+          const tekstAkcije = akcija.opis || akcija.naziv;
+          this.akcijeMap.set(artiklId, tekstAkcije);
+        } else {
+          console.log('  Akcija nema artiklID - preskačem');
+        }
+      });
+      
+      console.log('Konačna mapa akcija:', Array.from(this.akcijeMap.entries()));
+      
+      if (callback) {
+        callback();
+      }
+    },
+    error: (err) => {
+      console.error('Greška pri učitavanju akcija:', err);
+      if (callback) {
+        callback();
+      }
+    }
+  });
+}
+
+  ucitajPodatke() {
   this.loading = true;
   
   if (this.qrKod === 'default') {
@@ -106,40 +221,98 @@ export class JavniCjenikComponent implements OnInit {
     return;
   }
 
-  // Prvo dohvati sve artikle 
+  // Prvo dohvati sve artikle (da imamo kategorije)
   this.artikliService.getSviArtikli().subscribe({
     next: (sviArtikli) => {
       sviArtikli.forEach(a => {
         this.sviArtikliMap.set(a.id, a);
       });
       
-      // Zatim dohvati cjenik
+      // Zatim dohvati objekt po QR kodu
       this.objektiService.getObjektByQR(this.qrKod).subscribe({
         next: (objekt) => {
           this.objektNaziv = objekt.naziv;
           
-          this.cjeniciService.getAktivniCjenik(objekt.id).subscribe({
-            next: (cjenik) => {
-              if (cjenik && cjenik.artikli && cjenik.artikli.length > 0) {
-                const artikliSaKategorijom = cjenik.artikli.map((a: any) => {
-                  const puniArtikl = this.sviArtikliMap.get(a.artiklID);
-                  return {
-                    ...a,
-                    kategorijaID: puniArtikl?.kategorijaID
-                  };
-                }).filter((a: any) => a.kategorijaID); 
+   
+          this.ucitajAkcijeZaObjekt(objekt.id, () => {
+            
+            this.banneriService.getBanneriZaObjekt(objekt.id).subscribe({
+              next: (banneri) => {
+                console.log('🔥 BANNERI UČITANI:', banneri);
                 
-                this.kategorije = this.grupirajPoKategorijama(artikliSaKategorijom);
-              } else {
-                this.kategorije = [];
+                // Filtriraj aktivne
+                const aktivni = banneri.filter(b => b.aktivan);
+                
+                // Homepage
+                this.homepageBanneri = aktivni.filter(b => b.tip?.toLowerCase() === 'homepage');
+                
+                // Popup
+                this.popupBanner = aktivni.find(b => b.tip?.toLowerCase() === 'popup') || null;
+                
+                // Kategorija banneri - direktno u listu
+                this.kategorijaBanneri = aktivni.filter(b => b.tip?.toLowerCase() === 'kategorija');
+                
+                console.log('🔥 Kategorija banneri:', this.kategorijaBanneri);
+                console.log('🔥 Prvi banner sadržaj:', this.kategorijaBanneri[0]?.sadrzaj);
+                
+                // ===== NASTAVI S UČITAVANJEM CJENIKA =====
+                this.cjeniciService.getAktivniCjenik(objekt.id).subscribe({
+                  next: (cjenik) => {
+                    if (cjenik && cjenik.artikli && cjenik.artikli.length > 0) {
+                      const artikliSaKategorijom = cjenik.artikli.map((a: any) => {
+                        const puniArtikl = this.sviArtikliMap.get(a.artiklID);
+                        const akcijaOpis = this.akcijeMap.get(a.artiklID);
+                        
+                        return {
+                          ...a,
+                          kategorijaID: puniArtikl?.kategorijaID,
+                          akcijaOpis: akcijaOpis
+                        };
+                      }).filter((a: any) => a.kategorijaID);
+                      
+                      this.kategorije = this.grupirajPoKategorijama(artikliSaKategorijom);
+                    } else {
+                      this.kategorije = [];
+                    }
+                    this.loading = false;
+                  },
+                  error: (err) => {
+                    console.error('Greška pri učitavanju cjenika:', err);
+                    this.error = true;
+                    this.loading = false;
+                  }
+                });
+              },
+              error: (err) => {
+                console.error('Greška pri učitavanju banner-a:', err);
+                // Nastavi bez banner-a
+                this.cjeniciService.getAktivniCjenik(objekt.id).subscribe({
+                  next: (cjenik) => {
+                    // ... isti kod za cjenik
+                    if (cjenik && cjenik.artikli && cjenik.artikli.length > 0) {
+                      const artikliSaKategorijom = cjenik.artikli.map((a: any) => {
+                        const puniArtikl = this.sviArtikliMap.get(a.artiklID);
+                        const akcijaOpis = this.akcijeMap.get(a.artiklID);
+                        return {
+                          ...a,
+                          kategorijaID: puniArtikl?.kategorijaID,
+                          akcijaOpis: akcijaOpis
+                        };
+                      }).filter((a: any) => a.kategorijaID);
+                      this.kategorije = this.grupirajPoKategorijama(artikliSaKategorijom);
+                    } else {
+                      this.kategorije = [];
+                    }
+                    this.loading = false;
+                  },
+                  error: (err) => {
+                    console.error('Greška pri učitavanju cjenika:', err);
+                    this.error = true;
+                    this.loading = false;
+                  }
+                });
               }
-              this.loading = false;
-            },
-            error: (err) => {
-              console.error('Greška pri učitavanju cjenika:', err);
-              this.error = true;
-              this.loading = false;
-            }
+            });
           });
         },
         error: (err) => {
@@ -157,37 +330,37 @@ export class JavniCjenikComponent implements OnInit {
   });
 }
 
+  // Grupiranje artikala po kategorijama
   grupirajPoKategorijama(artikli: any[]): KategorijaPrikaz[] {
-  const grupe = new Map<number, KategorijaPrikaz>();
-  
-  artikli.forEach(artikl => {
-    const kategorijaId = artikl.kategorijaID;
-    if (!kategorijaId) return;
+    const grupe = new Map<number, KategorijaPrikaz>();
     
-    const kategorijaNaziv = this.kategorijeMap.get(kategorijaId) || 'Ostalo';
+    artikli.forEach(artikl => {
+      const kategorijaId = artikl.kategorijaID;
+      if (!kategorijaId) return;
+      
+      const kategorijaNaziv = this.kategorijeMap.get(kategorijaId) || 'Ostalo';
+      
+      if (!grupe.has(kategorijaId)) {
+        grupe.set(kategorijaId, {
+          id: kategorijaId,
+          naziv: kategorijaNaziv,
+          proizvodi: []
+        });
+      }
+      
+      grupe.get(kategorijaId)?.proizvodi.push(artikl);
+    });
     
-    if (!grupe.has(kategorijaId)) {
-      grupe.set(kategorijaId, {
-        id: kategorijaId,
-        naziv: kategorijaNaziv,
-        proizvodi: []
-      });
-    }
-    
-    grupe.get(kategorijaId)?.proizvodi.push(artikl);
-  });
-  
-  return Array.from(grupe.values()).sort((a, b) => a.id - b.id);
-}
-
+    return Array.from(grupe.values()).sort((a, b) => a.id - b.id);
+  }
 
   ucitajTestPodatke() {
     this.objektNaziv = 'Kavanica (TEST)';
     
-    const testArtikli: ArtiklUCjeniku[] = [
+    const testArtikli: any[] = [
       // Panonski Izvori (kategorija 4)
-      { artiklID: 2, artiklNaziv: 'Panonski Izvori Rakija', cijena: 12.00, redoslijedPrikaza: 1, zakljucan: true , kategorijaID: 4},
-      { artiklID: 3, artiklNaziv: 'Panonski Izvori Medica', cijena: 4.00, redoslijedPrikaza: 2, zakljucan: true , kategorijaID: 4},
+      { artiklID: 2, artiklNaziv: 'Panonski Izvori Rakija', cijena: 12.00, redoslijedPrikaza: 1, zakljucan: true, kategorijaID: 4 },
+      { artiklID: 3, artiklNaziv: 'Panonski Izvori Medica', cijena: 4.00, redoslijedPrikaza: 2, zakljucan: true, kategorijaID: 4 },
       
       // Bezalkoholna pića (kategorija 1)
       { artiklID: 4, artiklNaziv: 'Coca-Cola 0.25L', cijena: 3.00, redoslijedPrikaza: 3, zakljucan: false, kategorijaID: 1 },
@@ -218,19 +391,20 @@ export class JavniCjenikComponent implements OnInit {
   }
 
   promijeniKategoriju(id: number) {
-    this.aktivnaKategorija = id;
-  }
+  this.aktivnaKategorija = id;
+  this.popupZatvoren = false; 
+}
 
   promijeniJezik() {
     this.jezik = this.jezik === 'HR' ? 'EN' : 'HR';
   }
 
   getNazivKategorije(kategorija: any): string {
-  if (this.jezik === 'EN') {
-    return this.kategorijePrijevodi.get(kategorija.id) || kategorija.naziv;
+    if (this.jezik === 'EN') {
+      return this.kategorijePrijevodi.get(kategorija.id) || kategorija.naziv;
+    }
+    return kategorija.naziv;
   }
-  return kategorija.naziv;
-}
 
   getText(key: string): string {
     return this.translations[this.jezik][key] || key;
@@ -263,7 +437,14 @@ export class JavniCjenikComponent implements OnInit {
     }
   }
 
-   logout() {
+  zatvoriPopup(): void {
+  this.popupZatvoren = true;
+}
+
+
+
+
+  logout() {
     this.authService.logout();
     this.isLoggedIn = false;
     this.korisnikUloga = '';

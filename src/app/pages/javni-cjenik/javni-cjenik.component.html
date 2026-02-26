@@ -8,11 +8,11 @@
           {{ jezik }}
         </button>
         
-         @if (!isLoggedIn) {
-      <a routerLink="/login" class="login-link">{{ getText('prijava') }}</a>
-    } @else {
-      <button (click)="logout()" class="logout-btn">Odjava</button>
-    }
+        @if (!isLoggedIn) {
+          <a routerLink="/login" class="login-link">{{ getText('prijava') }}</a>
+        } @else {
+          <button (click)="logout()" class="logout-btn">Odjava</button>
+        }
       </div>
     </div>
     
@@ -20,6 +20,15 @@
       <small>{{ getText('qrKod') }}: {{ qrKod }}</small>
     </div>
   </div>
+
+  <!-- HOMEPAGE BANNERI -->
+  @if (homepageBanneri.length > 0) {
+    <div class="homepage-banneri">
+      @for (banner of homepageBanneri; track banner.id) {
+        <div class="homepage-banner" [innerHTML]="banner.sadrzaj"></div>
+      }
+    </div>
+  }
 
   <!-- Loading State -->
   @if (loading) {
@@ -70,15 +79,30 @@
 
     <!-- Proizvodi -->
     <div class="proizvodi-container">
+
       @if (aktivnaKategorija === 0) {
         <!-- Prikaži sve kategorije -->
         @for (kategorija of kategorije; track kategorija.id) {
           <div class="kategorija-section">
             <h2 class="kategorija-naslov">{{ getNazivKategorije(kategorija) }}</h2>
+            
+            <!-- BANNER ZA KATEGORIJU -->
+            @for (banner of kategorijaBanneri; track banner.id) {
+              @if (bannerPripadaKategoriji(banner, kategorija.id)) {
+                <div class="kategorija-banner" [innerHTML]="banner.sadrzaj"></div>
+              }
+            }
+            
             @for (proizvod of kategorija.proizvodi; track proizvod.artiklID) {
               <div class="proizvod-card">
                 <div class="proizvod-info">
                   <h3>{{ proizvod.artiklNaziv }}</h3>
+                  
+                  <!-- Prikaz akcije ako postoji -->
+                  <div *ngIf="proizvod.akcijaOpis" class="akcija-badge">
+                    🏷️ {{ proizvod.akcijaOpis }}
+                  </div>
+                  
                   @if (proizvod.zakljucan) {
                     <span class="brand-badge">Panonski Izvori</span>
                   }
@@ -95,10 +119,24 @@
           @if (kategorija.id === aktivnaKategorija) {
             <div class="kategorija-section">
               <h2 class="kategorija-naslov">{{ getNazivKategorije(kategorija) }}</h2>
+              
+              <!-- BANNER ZA KATEGORIJU -->
+              @for (banner of kategorijaBanneri; track banner.id) {
+                @if (bannerPripadaKategoriji(banner, kategorija.id)) {
+                  <div class="kategorija-banner" [innerHTML]="banner.sadrzaj"></div>
+                }
+              }
+              
               @for (proizvod of kategorija.proizvodi; track proizvod.artiklID) {
                 <div class="proizvod-card">
                   <div class="proizvod-info">
                     <h3>{{ proizvod.artiklNaziv }}</h3>
+                    
+                    <!-- Prikaz akcije ako postoji -->
+                    <div *ngIf="proizvod.akcijaOpis" class="akcija-badge">
+                      🏷️ {{ proizvod.akcijaOpis }}
+                    </div>
+                    
                     @if (proizvod.zakljucan) {
                       <span class="brand-badge">Panonski Izvori</span>
                     }
@@ -115,7 +153,17 @@
     </div>
   }
 
-  <!-- Bottom Navigation (samo za prijavljene) -->
+  <!-- POP-UP BANNER -->
+  @if (popupBanner && !popupZatvoren) {
+    <div class="popup-overlay" (click)="zatvoriPopup()">
+      <div class="popup-content" (click)="$event.stopPropagation()">
+        <button class="popup-close" (click)="zatvoriPopup()">✕</button>
+        <div [innerHTML]="popupBanner.sadrzaj"></div>
+      </div>
+    </div>
+  }
+
+  <!-- Bottom Navigation -->
   @if (isLoggedIn) {
     <div class="bottom-nav">
       <a routerLink="/" class="nav-item" routerLinkActive="active">

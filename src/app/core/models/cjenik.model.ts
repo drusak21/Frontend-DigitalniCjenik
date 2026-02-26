@@ -17,4 +17,6 @@ export interface ArtiklUCjeniku {
   redoslijedPrikaza: number;
   zakljucan: boolean;
   kategorijaID: number;
+  akcijaID?: number;
+  akcijaOpis?: string;
 }
