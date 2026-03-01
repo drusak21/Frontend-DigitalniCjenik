@@ -19,7 +19,8 @@ export class AdminDashboardComponent {
     { path: '/admin/artikli', icon: '🍽️', label: 'Artikli' },
     { path: '/admin/kategorije', icon: '📑', label: 'Kategorije' },
     { path: '/admin/akcije', icon: '🏷️', label: 'Akcije' },
-    { path: '/admin/banneri', icon: '🖼️', label: 'Banneri' }
+    { path: '/admin/banneri', icon: '🖼️', label: 'Banneri' },
+    { path: '/admin/analitika', icon: '📊', label: 'Analitika' }
   ];
 
   constructor(

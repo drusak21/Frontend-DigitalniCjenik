@@ -60,6 +60,13 @@ export const ADMIN_ROUTES: Routes = [
         data: { uloge: ['Administrator'] }
       },
       {
+        path: 'analitika',
+        loadComponent: () => 
+          import('./analitika/analitika.component').then(m => m.AnalitikaComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { uloge: ['Administrator'] }
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'korisnici'

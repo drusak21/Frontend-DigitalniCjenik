@@ -1,0 +1,144 @@
+<div class="analitika-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h2>Analitika i izvještaji</h2>
+      <p>Pregled statistike korištenja aplikacije</p>
+    </div>
+  </div>
+
+  <!-- Notifikacije -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    ❌ {{ errorMessage }}
+  </div>
+
+  <!-- Filteri -->
+  <div class="filter-card">
+    <h3>📊 Filtriraj izvještaje</h3>
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>Od datuma:</label>
+        <input type="date" [(ngModel)]="datumOd" class="filter-input">
+      </div>
+      <div class="filter-group">
+        <label>Do datuma:</label>
+        <input type="date" [(ngModel)]="datumDo" class="filter-input">
+      </div>
+      <div class="filter-group">
+        <label>Objekt:</label>
+        <select [(ngModel)]="selectedObjektId" class="filter-select">
+          <option value="0">Svi objekti</option>
+          <option *ngFor="let obj of objekti" [value]="obj.id">
+            {{ obj.naziv }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn-primary" (click)="filtriraj()" [disabled]="loading">
+          🔍 Primijeni filtere
+        </button>
+        <button class="btn-secondary" (click)="resetFilter()" [disabled]="loading">
+          ⟲ Reset
+        </button>
+        <button class="btn-export" (click)="exportToCSV()" [disabled]="loading">
+          📥 Export CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Učitavanje podataka...</p>
+  </div>
+
+  <!-- Dashboard sadržaj -->
+  <div *ngIf="!loading" class="dashboard-content">
+    <!-- KPI kartice -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">📱</div>
+        <div class="kpi-info">
+          <div class="kpi-value">{{ ukupnoQr }}</div>
+          <div class="kpi-label">QR skeniranja</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📄</div>
+        <div class="kpi-info">
+          <div class="kpi-value">{{ ukupnoOtvaranja }}</div>
+          <div class="kpi-label">Otvaranja cjenika</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">👆</div>
+        <div class="kpi-info">
+          <div class="kpi-value">{{ ukupnoKlikova }}</div>
+          <div class="kpi-label">Ukupno klikova</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-info">
+          <div class="kpi-value">{{ (ukupnoOtvaranja / (ukupnoQr || 1) * 100) | number:'1.0-0' }}%</div>
+          <div class="kpi-label">Konverzija</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dnevni trend - tablica -->
+    <div class="card">
+      <h3>📈 Dnevni trend</h3>
+      <div class="table-responsive">
+        <table class="analitika-table">
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>QR skeniranja</th>
+              <th>Otvaranja cjenika</th>
+              <th>Klikovi</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dan of poDanima">
+              <td>{{ dan.datum | date:'dd.MM.yyyy.' }}</td>
+              <td class="text-center">{{ dan.qr }}</td>
+              <td class="text-center">{{ dan.otvaranja }}</td>
+              <td class="text-center">{{ dan.klikovi }}</td>
+              <td>
+                <div class="trend-indicator">
+                  <span *ngIf="dan.qr > 0" class="trend-up">📈</span>
+                  <span *ngIf="dan.qr === 0" class="trend-neutral">➡️</span>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="poDanima.length === 0">
+              <td colspan="5" class="no-data">Nema podataka za odabrano razdoblje</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Statistika po danima - detaljni pregled -->
+    <div class="stats-grid">
+      <div class="stats-card">
+        <h4>Najaktivniji dan</h4>
+        <div class="stats-value">{{ getNajaktivnijiDanDatum() }}</div>
+        <div class="stats-label">{{ getNajaktivnijiDan()?.qr || 0 }} QR skeniranja</div>
+      </div>
+      <div class="stats-card">
+        <h4>Prosječno dnevno</h4>
+        <div class="stats-value">{{ getProsjecnoDnevno() | number:'1.0-0' }}</div>
+        <div class="stats-label">QR skeniranja</div>
+      </div>
+      <div class="stats-card">
+        <h4>Ukupno razdoblje</h4>
+        <div class="stats-value">{{ poDanima.length }}</div>
+        <div class="stats-label">dana</div>
+      </div>
+    </div>
+  </div>
+</div>
