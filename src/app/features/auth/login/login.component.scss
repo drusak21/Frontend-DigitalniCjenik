@@ -48,7 +48,7 @@ $gray-light: #e9ecef;
 .login-container {
   min-height: 100vh;
   @include flex-center;
-  padding: 1rem;
+  padding: 0;
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, 
