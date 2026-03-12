@@ -66,7 +66,7 @@
       {{ selectedObjekt.naziv }} - Cjenik
     </h3>
 
-    <!-- Status cjenika -->
+    <!-- Status cjenika - prikaži samo ako postoji -->
     <div class="cjenik-status" *ngIf="trenutniCjenik">
       Status cjenika: 
       <span class="status-badge" [ngClass]="{
@@ -79,115 +79,150 @@
       </span>
     </div>
 
-    <!-- Ako je cjenik aktivan - prikaži info poruku i samo pregled -->
-    <div class="info-message" *ngIf="trenutniCjenik?.status === 'aktivan'">
-      <p>🔍 Ovaj cjenik je aktivan i prikazuje se gostima. Za uređivanje kreirajte novu verziju.</p>
-    </div>
-
-    <!-- Gumb za kreiranje nove verzije - SAMO ako je trenutni cjenik aktivan -->
-    <div class="action-buttons" *ngIf="trenutniCjenik?.status === 'aktivan'">
-      <button class="btn-secondary" (click)="kreirajNovuVerzijuCjenika()">
-        📋 Kreiraj novu verziju
+    <!-- AKO NEMA CJENIKA - Prikaži gumb za kreiranje -->
+    <div class="no-cjenik-message" *ngIf="!trenutniCjenik">
+      <p>🔍 Ovaj objekt još nema kreiran cjenik.</p>
+      <button class="btn-primary" (click)="kreirajPrviCjenik()">
+        ➕ Kreiraj prvi cjenik
       </button>
     </div>
 
-    <!-- Filter po kategoriji i gumbi - SAMO za cjenike u pripremi -->
-    <div class="filter-bar" *ngIf="trenutniCjenik?.status === 'u pripremi'">
-      <select [(ngModel)]="filterKategorija" class="filter-select">
-        <option value="0">Sve kategorije</option>
-        <option *ngFor="let kat of kategorije" [value]="kat.id">
-          {{ kat.naziv }}
-        </option>
-      </select>
-      
-      <div class="action-buttons">
-        <button class="btn-primary" (click)="prikaziNoviFormu = !prikaziNoviFormu">
-          {{ prikaziNoviFormu ? '✕ Zatvori' : '+ Dodaj artikl' }}
-        </button>
-        
-        <!-- Gumb za slanje na potvrdu - samo ako je cjenik u pripremi -->
-        <button class="btn-success" (click)="posaljiNaPotvrdu()">
-          📤 Pošalji na potvrdu
+    <!-- Ako postoji cjenik, prikaži ostatak -->
+    <ng-container *ngIf="trenutniCjenik">
+      <!-- Ako je cjenik aktivan - prikaži info poruku i samo pregled -->
+      <div class="info-message" *ngIf="trenutniCjenik?.status === 'aktivan'">
+        <p>🔍 Ovaj cjenik je aktivan i prikazuje se gostima. Za uređivanje kreirajte novu verziju.</p>
+      </div>
+
+      <!-- Gumb za kreiranje nove verzije - SAMO ako je trenutni cjenik aktivan -->
+      <div class="action-buttons" *ngIf="trenutniCjenik?.status === 'aktivan'">
+        <button class="btn-secondary" (click)="kreirajNovuVerzijuCjenika()">
+          📋 Kreiraj novu verziju
         </button>
       </div>
-    </div>
 
-    <!-- Forma za dodavanje novog artikla - SAMO za cjenike u pripremi -->
-    <!-- Umjesto forme za unos novog artikla -->
-<div class="nova-forma" *ngIf="prikaziNoviFormu && trenutniCjenik?.status === 'u pripremi'">
-  <h4>Dodaj artikl u cjenik</h4>
-  
-  <!-- DROPDOWN SVIH ARTIKALA IZ BAZE -->
-  <div class="form-group">
-    <label>Odaberite artikl:</label>
-    <select [(ngModel)]="odabraniArtiklId" class="artikl-select">
-      <option value="0">-- Odaberite --</option>
-      <option *ngFor="let a of sviArtikli" [value]="a.id">
-        {{ a.naziv }} ({{ a.brand }}) - {{ getNazivKategorije(a.kategorijaID) }}
-      </option>
-    </select>
-  </div>
-
-  <!-- Prikaz odabranog artikla -->
-  <div *ngIf="odabraniArtikl" class="artikl-preview">
-    <p><strong>Odabrano:</strong> {{ odabraniArtikl.naziv }}</p>
-    <p><strong>Kategorija:</strong> {{ getNazivKategorije(odabraniArtikl.kategorijaID) }}</p>
-    <p><strong>Brand:</strong> {{ odabraniArtikl.brand }}</p>
-    <p><strong>Osnovna cijena:</strong> {{ odabraniArtikl.cijena }} €</p>
-  </div>
-
-  <!-- SAMO CIJENA SE MOŽE MIJENJATI -->
-  <div class="form-group">
-    <label>Cijena u cjeniku:</label>
-    <input type="number" [(ngModel)]="novaCijena" class="cijena-input">
-  </div>
-
-  <button (click)="dodajArtiklUCjenik()" class="btn-primary">
-    Dodaj u cjenik
-  </button>
-</div>
-
-    <!-- Zaključani artikli (Panonski Izvori) - uvijek se prikazuju, bez akcija -->
-    <div class="artikli-section" *ngIf="zakljucaniArtikli.length > 0">
-      <h4>🔒 Panonski Izvori (samo za pregled)</h4>
-      <div class="artikli-grid">
-        <div *ngFor="let artikl of zakljucaniArtikli" class="artikl-card locked">
-          <div class="artikl-naziv">{{ artikl.naziv }}</div>
-          <div class="artikl-kategorija">{{ getNazivKategorije(artikl.kategorijaID) }}</div>
-          <div class="artikl-cijena">{{ artikl.cijena ? (artikl.cijena | number:'1.2-2') : '0.00' }} €</div>
-          <div class="artikl-brand">{{ artikl.brand }}</div>
+      <!-- Filter po kategoriji i gumbi - SAMO za cjenike u pripremi -->
+      <div class="filter-bar" *ngIf="trenutniCjenik?.status === 'u pripremi'">
+        <select [(ngModel)]="filterKategorija" class="filter-select">
+          <option value="0">Sve kategorije</option>
+          <option *ngFor="let kat of kategorije" [value]="kat.id">
+            {{ kat.naziv }}
+          </option>
+        </select>
+        
+        <div class="action-buttons">
+          <button class="btn-primary" (click)="prikaziNoviFormu = !prikaziNoviFormu">
+            {{ prikaziNoviFormu ? '✕ Zatvori' : '+ Dodaj artikl' }}
+          </button>
+          
+          <!-- Gumb za slanje na potvrdu - samo ako je cjenik u pripremi -->
+          <button class="btn-success" (click)="posaljiNaPotvrdu()">
+            📤 Pošalji na potvrdu
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- Slobodni artikli -->
-    <div class="artikli-section">
-      <h4>📝 Vaši artikli</h4>
+      <!-- Forma za dodavanje novog artikla - SAMO za cjenike u pripremi -->
+      <div class="nova-forma" *ngIf="prikaziNoviFormu && trenutniCjenik?.status === 'u pripremi'">
+        <h4>Dodaj artikl u cjenik</h4>
+        
+        <!-- DROPDOWN SVIH ARTIKALA IZ BAZE -->
+        <div class="form-group">
+          <label>Odaberite artikl:</label>
+          <select [(ngModel)]="odabraniArtiklId" (change)="onArtiklChange()" class="artikl-select">
+            <option value="0">-- Odaberite artikl --</option>
+            <option *ngFor="let a of sviArtikli" [value]="a.id">
+              {{ a.naziv }} ({{ a.brand }}) - {{ getNazivKategorije(a.kategorijaID) }} - {{ a.cijena }}€
+            </option>
+          </select>
+        </div>
 
-      <div class="artikli-grid">
-        <div *ngFor="let artikl of filtriraniSlobodniArtikli" class="artikl-card">
-          <div class="artikl-naziv">{{ artikl.naziv }}</div>
-          <div class="artikl-kategorija">{{ getNazivKategorije(artikl.kategorijaID) }}</div>
-          <div class="artikl-cijena">{{ artikl.cijena ? (artikl.cijena | number:'1.2-2') : '0.00' }} €</div>
-          <div class="artikl-brand">{{ artikl.brand }}</div>
-          
-          <!-- Akcije - SAMO za cjenike u pripremi -->
-          <div class="artikl-akcije" *ngIf="trenutniCjenik?.status === 'u pripremi'">
-            <button class="btn-icon btn-edit" (click)="urediArtikl(artikl)" title="Uredi artikl">✎</button>
-            <button class="btn-icon btn-delete" (click)="ukloniArtiklIzCjenika(artikl)" title="Ukloni iz cjenika">🗑️</button>
+        <!-- Prikaz odabranog artikla -->
+        <div class="artikl-preview" *ngIf="odabraniArtikl">
+          <div class="preview-row">
+            <span class="preview-label">Naziv:</span>
+            <span class="preview-value">{{ odabraniArtikl.naziv }}</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">Kategorija:</span>
+            <span class="preview-value">{{ getNazivKategorije(odabraniArtikl.kategorijaID) }}</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">Brand:</span>
+            <span class="preview-value">{{ odabraniArtikl.brand || '-' }}</span>
+          </div>
+          <div class="preview-row highlight">
+            <span class="preview-label">Osnovna cijena:</span>
+            <span class="preview-value">{{ odabraniArtikl.cijena }} €</span>
+          </div>
+        </div>
+
+        <!-- CIJENA SE MOŽE MIJENJATI -->
+        <div class="form-group">
+          <label>Cijena u cjeniku:</label>
+          <input type="number" step="0.01" [(ngModel)]="novaCijena" class="cijena-input">
+        </div>
+
+        <!-- Redoslijed (opcionalno) -->
+        <div class="form-group">
+          <label>Redoslijed prikaza:</label>
+          <input type="number" [(ngModel)]="novaRedoslijed" class="redoslijed-input" min="1">
+          <small class="help-text">Automatski: {{ artikliUCjeniku.length + 1 }}</small>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-primary" 
+                  (click)="dodajArtiklUCjenik()" 
+                  [disabled]="!odabraniArtiklId || !novaCijena || loading">
+            ➕ Dodaj u cjenik
+          </button>
+          <button class="btn-secondary" (click)="prikaziNoviFormu = false; resetOdabirArtikla()">
+            ✕ Odustani
+          </button>
+        </div>
+      </div>
+
+      <!-- Zaključani artikli (Panonski Izvori) - uvijek se prikazuju, bez akcija -->
+      <div class="artikli-section" *ngIf="zakljucaniArtikli.length > 0">
+        <h4>🔒 Panonski Izvori (samo za pregled)</h4>
+        <div class="artikli-grid">
+          <div *ngFor="let artikl of zakljucaniArtikli" class="artikl-card locked">
+            <div class="artikl-naziv">{{ artikl.naziv }}</div>
+            <div class="artikl-kategorija">{{ getNazivKategorije(artikl.kategorijaID) }}</div>
+            <div class="artikl-cijena">{{ artikl.cijena ? (artikl.cijena | number:'1.2-2') : '0.00' }} €</div>
+            <div class="artikl-brand">{{ artikl.brand }}</div>
           </div>
         </div>
       </div>
 
-      <!-- Ako nema slobodnih artikala -->
-      <div *ngIf="filtriraniSlobodniArtikli.length === 0" class="no-results">
-        Nema pronađenih artikala
+      <!-- Slobodni artikli -->
+      <div class="artikli-section">
+        <h4>📝 Vaši artikli</h4>
+
+        <div class="artikli-grid">
+          <div *ngFor="let artikl of filtriraniSlobodniArtikli" class="artikl-card">
+            <div class="artikl-naziv">{{ artikl.naziv }}</div>
+            <div class="artikl-kategorija">{{ getNazivKategorije(artikl.kategorijaID) }}</div>
+            <div class="artikl-cijena">{{ artikl.cijena ? (artikl.cijena | number:'1.2-2') : '0.00' }} €</div>
+            <div class="artikl-brand">{{ artikl.brand }}</div>
+            
+            <!-- Akcije - SAMO za cjenike u pripremi -->
+            <div class="artikl-akcije" *ngIf="trenutniCjenik?.status === 'u pripremi'">
+              <button class="btn-icon btn-edit" (click)="urediArtikl(artikl)" title="Uredi artikl">✎</button>
+              <button class="btn-icon btn-delete" (click)="ukloniArtiklIzCjenika(artikl)" title="Ukloni iz cjenika">🗑️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ako nema slobodnih artikala -->
+        <div *ngIf="filtriraniSlobodniArtikli.length === 0" class="no-results">
+          Nema pronađenih artikala
+        </div>
       </div>
-    </div>
+    </ng-container>
   </div>
 
   <!-- ===== BANNERI SEKCIJA ===== -->
-  <!-- Banneri sekcija - SAMO za odabrani objekt -->
   <div class="card" *ngIf="selectedObjekt && banneri.length > 0">
     <h3>
       <span class="card-icon">🖼️</span>
@@ -210,24 +245,20 @@
         </div>
 
         <div class="banner-content">
-          <!-- Ako je slika u sadržaju -->
           <div *ngIf="banner.sadrzaj?.includes('<img')" 
                class="banner-preview" 
                [innerHTML]="banner.sadrzaj">
           </div>
           
-          <!-- Ako je tekst -->
           <div *ngIf="!banner.sadrzaj?.includes('<img')" class="banner-text">
             {{ banner.sadrzaj }}
           </div>
 
-          <!-- Povezana akcija (ako postoji) -->
           <div *ngIf="banner.akcijaNaziv" class="banner-akcija">
             🔗 Akcija: {{ banner.akcijaNaziv }}
           </div>
         </div>
 
-        <!-- Toggle za aktivaciju/deaktivaciju -->
         <div class="banner-actions">
           <button class="btn-toggle" 
                   (click)="toggleBannerAktivnost(banner)"
@@ -244,8 +275,6 @@
   <div class="empty-banner" *ngIf="selectedObjekt && banneri.length === 0">
     <p>Nema banner-a za ovaj objekt.</p>
   </div>
-  <!-- ===== KRAJ BANNERI SEKCIJE ===== -->
-
 </div>
 
 <!-- Edit artikl modal -->

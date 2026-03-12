@@ -505,4 +505,36 @@ export class UgostiteljDashboardComponent implements OnInit {
     
     return filtrirano;
   }
+
+  kreirajPrviCjenik(): void {
+  if (!this.selectedObjekt) {
+    this.errorMessage = 'Nema odabranog objekta';
+    return;
+  }
+
+  this.loading = true;
+
+  const noviNaziv = `${this.selectedObjekt.naziv} - Osnovna ponuda`;
+  
+  const noviCjenikData = {
+    naziv: noviNaziv,
+    objektID: this.selectedObjekt.id,
+    artikli: []  
+  };
+
+  this.cjeniciService.createCjenik(noviCjenikData).subscribe({
+    next: (response) => {
+      console.log('Prvi cjenik kreiran:', response);
+      this.successMessage = 'Cjenik uspješno kreiran';
+      this.ucitajCjenikZaObjekt(this.selectedObjekt!.id);
+      this.loading = false;
+      setTimeout(() => this.successMessage = '', 3000);
+    },
+    error: (error) => {
+      console.error('Greška pri kreiranju cjenika:', error);
+      this.errorMessage = 'Greška pri kreiranju cjenika';
+      this.loading = false;
+    }
+  });
+}
 }
