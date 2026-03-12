@@ -285,10 +285,8 @@ ucitajBannereZaObjekt(objektId: number): void {
               },
               error: (err) => {
                 console.error('Greška pri učitavanju banner-a:', err);
-                // Nastavi bez banner-a
                 this.cjeniciService.getAktivniCjenik(objekt.id).subscribe({
                   next: (cjenik) => {
-                    // ... isti kod za cjenik
                     if (cjenik && cjenik.artikli && cjenik.artikli.length > 0) {
                       const artikliSaKategorijom = cjenik.artikli.map((a: any) => {
                         const puniArtikl = this.sviArtikliMap.get(a.artiklID);
